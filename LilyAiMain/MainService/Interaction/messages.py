@@ -4,11 +4,20 @@ from typing import Any
 
 
 @dataclass
+class ImageAttachment:
+    """An image the user sent along with a message (e.g. a game screenshot). Held in memory only."""
+    data: bytes
+    mime: str = "image/png"
+    name: str = "image"
+
+
+@dataclass
 class IncomingMessage:
     user_id: str
     text: str
     display_name: str = ""
     source: str = "discord"  # discord | simulator | web
+    images: list[ImageAttachment] = field(default_factory=list)
 
 
 @dataclass
