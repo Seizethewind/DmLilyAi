@@ -172,15 +172,68 @@ Phases 33 to 37 (and 36a if triggered) must be done in order. The monolith is re
 
 | Phase | Status | Commit | Notes |
 |-------|--------|--------|-------|
-| 01 | done | this commit | Branch `docs-optimization` already existed (head `057c186`, "docs: add Optimization Plan (54 phases)"), so it was reused. `main` was at `f7fb4ec04c6af37d82fc9cf2b5869b121c3b71ef` when checked. This commit replaces the v1 plan with v2 |
-| 02 | not started | | |
+| 01 | done | `05406d2` | Branch `docs-optimization` already existed (head `057c186`, "docs: add Optimization Plan (54 phases)"), so it was reused. `main` was at `f7fb4ec04c6af37d82fc9cf2b5869b121c3b71ef` when checked. That commit replaced the v1 plan with v2 |
+| 02 | done | this commit | Appendix A filled: 40 `.md` files plus 1 `.xlsx`. Sizes are bytes as reported by GitHub on the branch head. See the notes under Appendix A |
 | 03-54 (plus 04a, 04b, and conditional 18a, 36a) | not started | | Note for Phase 04: this plan file lives inside `Guide/`, so check whether the engine indexes it |
 
 ---
 
 ## Appendix A: Baseline file list
 
-_To be filled in Phase 02._
+Recorded in Phase 02 from branch `docs-optimization` (head `05406d2`). Sizes are in bytes. Paths are relative to `LilyAiGameSpace/Umamusume/Guide/`.
+
+| # | Path | Size |
+|---|------|------|
+| 1 | `Readme.md` | 26,554 |
+| 2 | `Optimization Plan.md` | this file (size changes with every phase) |
+| 3 | `AdvanceCareerGuide/AdvanceCareerGuide.md` | 13,586 |
+| 4 | `AdvanceCareerGuide/Part1_CareerTraining.md` | 29,132 |
+| 5 | `AdvanceCareerGuide/Part2_StatsAndRaceMechanics.md` | 44,338 |
+| 6 | `AdvanceCareerGuide/Part3_SupportCards.md` | 33,250 |
+| 7 | `AdvanceCareerGuide/Part4_InheritanceAndParenting.md` | 33,602 |
+| 8 | `AdvanceCareerGuide/Part5_SkillsAndPvP.md` | 29,291 |
+| 9 | `AdvanceCareerGuide/Part6_AccountGachaEvents.md` | 18,965 |
+| 10 | `AdvanceCareerGuide/SupportCardEncyclopedia.md` | 238,564 |
+| 11 | `AdvanceGameplayGuide/AdvanceGameplayGuide.md` | 573,442 |
+| 12 | `Affinity/compatibility_chart_boxes.md` | 99,796 |
+| 13 | `Affinity/compatibility_spreadsheet.md` | 463,588 |
+| 14 | `Affinity/umamusume_affinity_tables.md` | 63,603 |
+| 15 | `Career/CareerStartWorkflow.md` | 9,940 |
+| 16 | `Career/Scenario/GrandLive.md` | 19,986 |
+| 17 | `Career/Scenario/Trackblazer.md` | 42,120 |
+| 18 | `Career/Scenario/UnityCup.md` | 18,692 |
+| 19 | `Career/Scenario/UraFinale.md` | 17,543 |
+| 20 | `Career/Scenario/UraFinaleVer2UnityCupVer2Updated.md` | 9,445 |
+| 21 | `Champions Meeting/ChampionMeeting.md` | 4,431 |
+| 22 | `Champions Meeting/Cm20.md` | 51,954 |
+| 23 | `CommunityGuide/Guide1.md` | 81,368 |
+| 24 | `CommunityGuide/Guide2.md` | 488,420 |
+| 25 | `CommunityGuide/Guide3.md` | 529,524 |
+| 26 | `CommunityGuide/Guide4.md` | 184,134 |
+| 27 | `CommunityGuide/Guide5.md` | 49,621 |
+| 28 | `CommunityGuide/Guide6.md` | 20,273 |
+| 29 | `CommunityGuide/Guide7.md` | 20,252 |
+| 30 | `CommunityGuide/Guide8.md` | 39,614 |
+| 31 | `CommunityGuide/Guide9.md` | 20,257 |
+| 32 | `Race Mechanics Handbook/RaceMechanicHandBook.md` | 37,993 |
+| 33 | `RaceList/Race.md` | 47,044 |
+| 34 | `RaceList/Racelist.md` | 22,956 |
+| 35 | `Team Trials PvP Scoring System/PvpTeamTrials.md` | 15,631 |
+| 36 | `Uma Musume Guide For Absolute Beginners/BeginnerGuide.md` | 24,692 |
+| 37 | `Uma Musume Legacies/ Legacy.md` (leading space in the filename) | 19,568 |
+| 38 | `Umamusume Global Quickstart Guide/Readme.md` | 2,872 |
+| 39 | `Umamusume Global Quickstart Guide/UmamusumeGlobalQuickstartGuide.md` | 4,899 |
+| 40 | `Umamusume New Player FAQ/UmamusumeNewPlayerFAQ.md` | 9,039 |
+| (non-md) | `Affinity/compatibility_chart.xlsx` | 81,581 |
+
+**Ten largest files at baseline** (for Phase 46, before Track 4 shrinks the monolith): `AdvanceGameplayGuide.md` (573,442), `Guide3.md` (529,524), `Guide2.md` (488,420), `compatibility_spreadsheet.md` (463,588), `SupportCardEncyclopedia.md` (238,564), `Guide4.md` (184,134), `compatibility_chart_boxes.md` (99,796), `Guide1.md` (81,368), `umamusume_affinity_tables.md` (63,603), `Cm20.md` (51,954).
+
+**Notes found while listing:**
+
+- `Guide6.md`, `Guide7.md` and `Guide9.md` are almost the same size (20,273, 20,252 and 20,257 bytes). This fits the "ends mid-section" issue (I4) and suggests they were cut at a size limit. Worth checking in Phase 28.
+- There is no `Glossary` folder under `Guide/`, but Phase 45 links to one. Locate it elsewhere in the repo during Phase 04, or drop that part of Phase 45.
+- Two files are both named `Readme.md` (`Guide/Readme.md` and `Umamusume Global Quickstart Guide/Readme.md`). Keep this in mind for Phase 04(b) and (d), since name matching could confuse them.
+- `INDEX.md`, `_SearchTests.md`, `_DocHeaderSchema.md` and `_Gaps.md` do not exist yet, as expected.
 
 ## Appendix B: Engine audit findings
 
