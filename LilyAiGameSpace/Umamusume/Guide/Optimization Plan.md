@@ -14,6 +14,7 @@
    - Phase 36a (conditional): newer or unique text merged into `SupportCardEncyclopedia.md`, copied verbatim.
    - Phase 37: the monolith body is replaced by an index, only after every line is accounted for.
    - Phase 43: guide-library section moved from `Readme.md` to `INDEX.md`.
+   - Phase 04 (code, not markdown): the docs engine now skips files and folders starting with `_` as well as `.` (commits `a17b343` and `3352d0f`).
 3. **Every phase has a "Done when" check.** If it can't be checked, it's too big, so split it.
 4. **Never rename or move a file until Phase 04b is done.** The calculators and the docs engine read some files by path (at least `Legacy.md`, `PvpTeamTrials.md`, `RaceMechanicHandBook.md`), and the baseline search results must exist first.
 5. **Renames update every reference, not only markdown links.** A rename phase is done only when a repo-wide search for the old filename (code, tests, workflows, RAG or ingestion config, docs) finds nothing left.
@@ -153,7 +154,7 @@ Phases 33 to 37 (and 36a if triggered) must be done in order. The monolith is re
 | 51 | `_SearchTests.md`, Appendix C | Re-run the script from 04a and record the **Final** column next to the Baseline | Both columns filled, and no question that passed at baseline fails now |
 | 52 | whole repo | Second audit, same scope as Phase 17 (links plus old filenames and path strings) | Zero broken links and zero old-name references |
 | 53 | failures from 51 | One tiny phase per failure (53a, 53b...), fixing only what that question needs | Re-test passes |
-| 54 | PR | Open a PR from `docs-optimization` and review the diff for accidental content changes | Diff shows only headers, names, links, pointers, notes and the named exceptions in rule 2 |
+| 54 | PR | Open a PR from `docs-optimization` and review the diff for accidental content changes | Diff shows only headers, names, links, pointers, notes, the named exceptions in rule 2, and the engine skip-rule change from Phase 04 (code) |
 
 ---
 
@@ -175,7 +176,8 @@ Phases 33 to 37 (and 36a if triggered) must be done in order. The monolith is re
 | 01 | done | `05406d2` | Branch `docs-optimization` already existed (head `057c186`, "docs: add Optimization Plan (54 phases)"), so it was reused. `main` was at `f7fb4ec04c6af37d82fc9cf2b5869b121c3b71ef` when checked. That commit replaced the v1 plan with v2 |
 | 02 | done | `151850c` | Appendix A filled: 40 `.md` files plus 1 `.xlsx`. Sizes are bytes as reported by GitHub on the branch head. See the notes under Appendix A |
 | 03 | done (draft) | this commit | `_SearchTests.md` has 25 questions built around training Kitasan Black, each with a form for any trainee. Questions 1 to 4 come from the project owner, 5 to 25 are drafted from guide headings and need owner review. Expected sections were checked against the files |
-| 04-54 (plus 04a, 04b, and conditional 18a, 36a) | not started | | Note for Phase 04: this plan file lives inside `Guide/`, so check whether the engine indexes it |
+| 04 | in progress | `a17b343`, `3352d0f` (engine and its test), this commit (Appendix B) | (a) to (d) done. (e) partly done, see Appendix B. Engine change: files and folders starting with `_` are now skipped (no existing doc starts with `_`). `Optimization Plan.md` is not covered by that rule and is still indexed |
+| 04a-54 (plus conditional 18a, 36a) | not started | | |
 
 ---
 
@@ -239,7 +241,63 @@ Recorded in Phase 02 from branch `docs-optimization` (head `05406d2`). Sizes are
 
 ## Appendix B: Engine audit findings
 
-_To be filled in Phase 04. Required items: (a) chunking, (b) skipped files and indexed `INDEX.md` / `README.md`, (c) front matter handling, (d) name matching, (e) file-and-line list of path references._
+Recorded in Phase 04 from `LilyAiGameSpace/UmamusumeGameSpaceEngine.py` on branch `docs-optimization`. The engine indexes everything under `LilyAiGameSpace/Umamusume/` (Character, Glossary, Guide, Skill, Support Cards and the top-level `README.md`), not only `Guide/`.
+
+**(a) Chunking**
+
+- Docs are split at markdown headings H1 to H4. Fenced code blocks are ignored when looking for headings. Each section has a path such as `H2 > H3`.
+- Search ranks sections, not files. A query word scores by how often it appears in the section (weighted by how rare the word is across all sections). A word found in the section's heading path scores extra, and a word in the doc's name or aliases adds a boost to the whole doc.
+- Sections named `Images` are hidden everywhere. Sections named `Sources` are readable but not searched.
+- A read returns 6,000 characters by default and 12,000 at most. A whole doc longer than the limit returns only its first section plus an outline of up to 40 sections.
+- Nothing splits by size. A section with no sub-headings is a single chunk.
+- Files over 2,000,000 bytes are skipped. No current file is that large (largest: `Support Cards/SSR-Details.md`, about 601 KB).
+- The sandbox table tool refuses more than 400,000 characters of text, so the monolith, Guide2, Guide3 and `compatibility_spreadsheet.md` only work there when a section is named.
+
+**(b) Skipped and indexed files**
+
+- Before Phase 04: only paths with a part starting with `.` and files over 2 MB were skipped, so `_` files were indexed.
+- After Phase 04 (commits `a17b343` and `3352d0f`): paths with any part starting with `.` or `_` are skipped. A test covers it. No existing file under `Umamusume/` starts with `_` or `.`, so no current doc is hidden by this.
+- `Optimization Plan.md` does not start with `_`, so it is still indexed. Decision for Phase 04a: the test runner excludes the doc id `Guide/Optimization Plan`, or the plan file is renamed later.
+- `INDEX.md` and nested `README.md` files are indexed like any other `.md` file.
+- Every `README.md` also gets its parent folder name as an alias, and all of them share the alias `readme`. A lookup of `readme` returns the first by id order, which is `Guide/Readme`.
+
+**(c) Front matter**
+
+- A header is read only if the file starts with `---` at the very first character and has a closing `---`. A leading blank line or byte-order mark turns the header into body text.
+- Lines are plain `key: value`. Only `title` (overrides the first H1) and `aliases` (comma-separated, on one line) are used. Every other field is read and discarded, so it is invisible to search and reads.
+- Aliases boost the doc's rank for any matching word, so generic words in `aliases` would skew results.
+- Decision input for Phase 18: the full schema is tolerated, but fields such as `server`, `status`, `expires` and `topics` are for human readers only unless the engine is changed (possible 18a).
+
+**(d) Name matching**
+
+- A doc id is its path under `Umamusume/` without `.md`, for example `Guide/CommunityGuide/Guide1`.
+- Aliases: the title (front matter `title` or the first H1), the file name with `_` and `-` turned into spaces, the same name split at CamelCase, the parent folder name for README files, front matter `aliases`, and the Japanese name for characters.
+- Lookup ignores case, spaces, underscores and punctuation. The leading space in ` Legacy.md` does not break lookup but is part of the id, so renames change ids.
+- After a rename, the old file-name alias disappears unless it is kept in `aliases`. That conflicts with ground rule 5, so it needs an owner decision at Phase 07.
+- Saved guides (table `guide_cache`) store doc ids and a content fingerprint. After a rename or split they are still served but flagged as stale.
+
+**(e) References to `Guide/` paths and old filenames**
+
+Checked so far (line numbers are from the branch head):
+
+| File | Line | What it says | Kind |
+|------|------|--------------|------|
+| `.github/workflows/racelist.yml` | 41 | `git add LilyAiGameSpace/Umamusume/Guide/RaceList/Racelist.md` | Runtime path (`Racelist.md` is not renamed in this plan) |
+| `.github/scripts/scrape_racelist.py` | 4, 29 | Output path `LilyAiGameSpace/Umamusume/Guide/RaceList/Racelist.md` (line 29 is the runtime `OUT` path) | Runtime path (not renamed) |
+| `.github/scripts/scrape_racelist.py` | 8, 15 | File name `Racelist.md` in the docstring | Comment |
+| `LilyAiGameSpace/sandbox_scripts/game_calcs.py` | 7, 11 to 13 | Docstring names `Guide/Uma Musume Legacies/Legacy.md`, `PvpTeamTrials.md`, `RaceMechanicHandBook.md`; two section comments repeat `Legacy.md` and `PvpTeamTrials.md` | Comment only. The calculators hold their rules in code and read no doc files at run time. The docstring already uses the post-Phase-05 name `Legacy.md` |
+| `LilyAiGameSpace/CareerEvaluator.py` | 2 to 3 | Cites `AdvanceCareerGuide/Part2_StatsAndRaceMechanics.md` and `Skill/skill.md` | Comment only (Part 2 is not renamed in this plan) |
+| `tests/test_game_space_engine.py` | `setUp` and the search tests | Fixture `Guide/RaceList/Racelist` in a temp folder | Synthetic fixture, does not read the real files |
+
+Checked with no `Guide/` references: `UmamusumeCatalog.py`, `UmamusumeSkills.py`, `affinity_data.py`, `sandbox_runner.py`, `docs_table_ops.py`, `guide_builder.py`, `LilyAiTool/GameSpaceTools/game_space_tools.py` and `sandbox_tools.py`, `LilyAiRag/service.py`, `LilyAiMain/MainService/bootstrap.py`, `tests/test_guide_builder.py`, `render.yaml`, `.dockerignore`, root `README.md`, `.github/workflows/fetch-wiki-sources.yml`.
+
+Not yet checked (to be covered by the repo-wide audit in Phase 17, and again in Phase 52, before the first rename): `tools/*.py`, `.github/scripts/populate_character_stubs.py`, the other workflows, `LilyAiContext`, `LilyAiMain` Discord, Interaction and Api folders, `LilyAiFrontend`, `LilyAiWeb`, `LilyAiLearning`, `LilyAiMemory`, `LilyAiCore`, `LilyAiDocs`, `debug/`, `sources/`, `Dockerfile`, `.env.example`, and the remaining tests.
+
+Other findings for later phases:
+
+- `affinity_data/` is at `LilyAiGameSpace/affinity_data/`. From the Affinity files the relative link for Phase 41 is `../../../affinity_data/`.
+- `affinity_data.py` states that its data covers 74 characters on Global (v1.35.2), which fits issue I7.
+- `game_docs_list` shows up to 200 docs per category, and all guide docs share the category `Guide`, so adding files under `Guide/` needs no code change.
 
 ## Appendix C: Search test results
 
