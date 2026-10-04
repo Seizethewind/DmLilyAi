@@ -20,6 +20,8 @@ Design notes:
 - Docs are split at markdown headings; search ranks sections, not files.
 - The "Images" section of a doc is hidden for now (images are out of scope), and
   markdown image syntax is reduced to its alt text.
+- Any file or folder whose name starts with "." or "_" is not indexed (working files such as
+  _SearchTests.md or _Gaps.md stay out of the bot's answers).
 - Standard library only.
 """
 
@@ -262,7 +264,8 @@ class UmamusumeGameSpaceEngine:
             if self.root.is_dir():
                 for p in sorted(self.root.rglob("*.md")):
                     rel = p.relative_to(self.root)
-                    if any(part.startswith(".") for part in rel.parts):
+                    # Hidden (".x") and working ("_x") files or folders are never indexed.
+                    if any(part.startswith((".", "_")) for part in rel.parts):
                         continue
                     try:
                         st = p.stat()
