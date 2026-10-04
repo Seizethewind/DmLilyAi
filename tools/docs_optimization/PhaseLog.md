@@ -9,15 +9,29 @@ Status of every phase in `Optimization Plan.md` (same folder). One row per phase
 | 03 | done (draft) | `1c94183` | The test set has 25 questions built around training Kitasan Black, each with a form for any trainee. Questions 1 to 4 come from the project owner, 5 to 25 are drafted from guide headings and need owner review |
 | 04 | done | `e805496` | Appendix B filled from the engine source and repo-wide searches. Six findings changed the plan (v2.1) |
 | 04c | done | `f08f781` plus two delete commits | Added the plan and `SearchTests.md` under `tools/docs_optimization/`, then deleted `Guide/Optimization Plan.md` and `Guide/_SearchTests.md`. A move is an add plus deletes through the GitHub API. Owner also approved engine change 18a (built in Phase 18) |
-| 04a | built, first run not yet read | `6c077b9` | Added `tools/run_search_tests.py` and `.github/workflows/search-tests.yml`. The workflow runs on every push to `docs-optimization` that touches the docs, the engine, the runner, the test table or the workflow, so this commit started the first run. It could not be checked from the chat (no access to the Actions page). **To read it:** repo Actions tab, workflow "Search tests", open the latest run, then the job summary (tables) or the `search-test-results` artifact (JSON). The run also reports whether `tests/test_game_space_engine.py` passes |
-| 04b | not started | | Record the first run on an untouched docs folder as the **Baseline**. Needs the run result from 04a |
+| 04a | done | `6c077b9` | Added `tools/run_search_tests.py` and `.github/workflows/search-tests.yml`. The first run worked and produced the baseline below. The run's engine-test result was not reported, so it is still unknown whether `tests/test_game_space_engine.py` passes |
+| 04b | done | this commit | Baseline recorded: per-question results in `SearchTests.md`, totals below, and `baseline.json` saved for `--compare`. The baseline was typed in from the run's job summary, with Q1 context counted as `fail` (see `SearchTests.md`). **Gate open for Track 1, but see the finding below before starting it** |
+| 04d | proposed, waiting for owner | | Engine ranking fix. See the finding below |
 | 05-54 (plus conditional 18a, 36a) | not started | | |
 
 ## Search test summary (Appendix C of the plan)
 
-Per-question results are in the run's job summary. Fill this table in Phases 04b and 51. Passed = a top-5 hit is the expected doc and section.
+Passed = a top-5 hit is the expected doc and section.
 
 | Run | Phase | Commit | search passed | scoped passed | context passed | Engine tests |
 |-----|-------|--------|---------------|---------------|----------------|--------------|
-| Baseline | 04b | | _/25 | _/25 | _/25 | |
+| Baseline | 04b | `6c077b9` | 1/25 | 1/25 | 1/25 | not reported |
 | Final | 51 | | _/25 | _/25 | _/25 | |
+
+Baseline detail: search has 1 pass, 4 file, 1 alt, 19 fail. Scoped is the same. Context has 1 pass, 3 file, 19 fail, 2 none (after the Q1 correction).
+
+## Baseline finding: ranking, not the documents, causes most failures
+
+- In 19 of 25 questions the top hits are the same few sections of the community guides, mostly `Guide/CommunityGuide/Guide2 > Technical Information > Racing vs Training` and `Guide2 > Uma Musume Reference`, plus `Guide1 > How does the tool work`. They come back for unrelated questions (summer camp, deck slots, fans) and push the right sections out of the top 5.
+- The most likely cause is the engine's ranking (Appendix B (a): section length is not normalized). Very large sections contain every query word many times, so they score higher than small, focused sections such as `CareerStartWorkflow > Step 4`. This is a cause inferred from the engine code and these results, not yet measured. Phase 04d would first add section sizes to the runner output to confirm it.
+- Scoping the search to the Guide folder changes nothing, so the character page boost is not the main problem for these questions.
+- In chat, a message that names Kitasan Black injects only her character page (`context` mode), so guide answers reach the model only if it calls the search tool.
+- Questions 12, 13 and 15 find the right character page but return its parent section (`Game data: versions`) instead of `Shared aptitudes` or `Shared career objectives`.
+- Renames (Track 1) and headers (Track 2) will not change these results, because they do not change section sizes or ranking. Only the split of `AdvanceGameplayGuide.md` and the engine changes can.
+
+**Proposed Phase 04d (owner decision needed):** change the engine so that section length does not dominate. Two options, which can be combined: (1) length-normalized scoring (BM25 style) in `_rank`, and (2) splitting very large sections into smaller chunks at index time, which also fixes `read()` cutting off long sections at 12,000 characters. Either needs engine tests. Track 4 would then target the largest sections (Guide2, Guide3, Guide1, the encyclopedia, the monolith), not only `AdvanceGameplayGuide.md`.
