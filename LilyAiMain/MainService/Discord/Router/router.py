@@ -15,6 +15,7 @@ from LilyAiMain.MainService.Interaction.Menus.menus import HELP_TEXT, main_menu
 from LilyAiMain.MainService.Interaction.messages import IncomingMessage, MenuItem, OutgoingMessage
 from LilyAiMain.MainService.Interaction.Onboarding.onboarding import OnboardingFlow
 from LilyAiMain.MainService.Interaction.Polls.polls import PollManager
+from LilyAiMain.MainService.Interaction.Workflows.career_review import CareerReview
 from LilyAiMain.MainService.Interaction.Workflows.chat_workflow import ChatRequest, ChatWorkflow
 from LilyAiMemory.service import MemoryService
 
@@ -76,6 +77,7 @@ class DMRouter:
         onboarding: OnboardingFlow,
         link_trainer: LinkTrainerFlow,
         guides: GuideBuilder | None = None,
+        career: CareerReview | None = None,
     ):
         self.memory, self.chat, self.replies, self.bus = memory, chat, replies, bus
         self.sessions, self.limiter, self.access = sessions, limiter, access
@@ -84,8 +86,12 @@ class DMRouter:
         # Guides are written with the chat model and saved in the shared guide cache. The docs engine is
         # looked up lazily, so building the router never touches the docs folder.
         self.guides = guides or GuideBuilder(None, chat.provider, chat.settings.chat_model, memory.guide_cache)
+        # Screenshots of a finished trainee: read by a vision model, judged in code against the guide docs.
+        self.career = career or CareerReview(chat.provider)
 
     async def route(self, msg: IncomingMessage) -> list[OutgoingMessage]:
+        if msg.images:
+            return await self._route_images(msg)
         text, truncated = clean_input(msg.text)
         if not text:
             return []
@@ -102,6 +108,23 @@ class DMRouter:
             out = await self._dispatch(msg, text)
         if truncated:
             out = [OutgoingMessage(_TRUNCATED_NOTICE, kind="system"), *out]
+        return self._out(msg, out)
+
+    async def _route_images(self, msg: IncomingMessage) -> list[OutgoingMessage]:
+        """A message with screenshots goes to the career review, behind the same access and rate checks as text.
+        The caption (if any) can name the target ("long front runner") or the stat cap ("cap 1200")."""
+        uid = msg.user_id
+        caption, _ = clean_input(msg.text)
+        self.bus.publish("dm_in", msg.source, uid, msg.display_name, f"[{len(msg.images)} screenshot(s)] {caption}".strip())
+
+        if not self.access.permits(uid, msg.source):
+            return self._out(msg, [OutgoingMessage("Sorry, I'm not available for you yet.", kind="system")])
+        wait = self.limiter.check(uid)
+        if wait:
+            return self._out(msg, [OutgoingMessage(f"Give me about {int(wait) + 1}s to catch up, then try again.", kind="system")])
+
+        async with self.sessions.lock(uid):
+            out = await self.career.review(msg.images, caption)
         return self._out(msg, out)
 
     def _out(self, msg: IncomingMessage, out: list[OutgoingMessage]) -> list[OutgoingMessage]:
