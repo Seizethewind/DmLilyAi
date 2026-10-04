@@ -1,14 +1,15 @@
-# Optimization Plan (v2.2)
+# Optimization Plan (v2.3)
 
-**Scope:** `LilyAiGameSpace/Umamusume/Guide/` (all paths below are relative to it unless stated). This plan, the test set and other maintainer files live in `tools/docs_optimization/`, outside the folder the engine indexes.
+**Scope:** `LilyAiGameSpace/Umamusume/Guide/` (all paths below are relative to it unless stated). This plan, the test set, the phase log and other maintainer files live in `tools/docs_optimization/`, outside the folder the engine indexes.
 **Goal:** Make small, targeted markdown changes so LilyAi can find the right document and the right section quickly.
 **Branch:** `docs-optimization` (never commit to `main` directly)
+**Phase status:** see `PhaseLog.md` in this folder.
 
 ---
 
 ## 1. Ground rules
 
-1. **One phase = one commit.** Each phase touches one file or one tiny, uniform edit. Conditional sub-phases (for example 36a) get their own commit too. (A file move through the GitHub API is an add commit plus delete commits, so Phase 04c is the one exception.)
+1. **One phase = one commit.** Each phase touches one file or one tiny, uniform edit. Conditional sub-phases (for example 36a) get their own commit too. (A file move through the GitHub API is an add commit plus delete commits, so Phase 04c was the one exception.)
 2. **Move and label, don't rewrite.** Content is copied verbatim. Only headers, names, links, pointers and notes change. **Named exceptions** (each reviewed by diff before commit):
    - Phase 30: site-navigation boilerplate removed from CM20.
    - Phase 36a (conditional): newer or unique text merged into `SupportCardEncyclopedia.md`, copied verbatim.
@@ -17,10 +18,11 @@
 3. **Every phase has a "Done when" check.** If it can't be checked, it's too big, so split it.
 4. **Never rename or move a doc until Phase 04b is done.** The engine addresses docs by id (the path without `.md`, for example `Guide/RaceList/Racelist`), and `tests/test_game_space_engine.py` asserts some ids. The calculators only mention doc paths in comments, they do not open them. The baseline search results must exist before any rename.
 5. **Renames update every reference, not only markdown links.** A rename phase is done only when a repo-wide search for the old filename (code, tests, workflows, RAG or ingestion config, docs) finds nothing left, and `tests/test_game_space_engine.py` still passes.
-6. **Phases can be skipped or merged** if Phase 04 shows they aren't needed. Record skips in the log (section 5).
+6. **Phases can be skipped or merged** if Phase 04 shows they aren't needed. Record skips in `PhaseLog.md`.
 7. **Rollback:** each phase is one commit, so `git revert <commit>` undoes it.
 8. **Batching aid (optional):** uniform phases (07-16 renames, 19-27 headers) may be applied by a script or workflow driven by one reviewed mapping table, as long as each phase is still its own commit.
 9. **Generated files are not edited by hand.** `RaceList/Racelist.md` is rewritten by a workflow (see Appendix B). Any change to it goes into the generating script.
+10. **Every docs commit gets a search-test run.** The workflow `.github/workflows/search-tests.yml` runs on each push to this branch that touches the docs. A phase is not done if its run shows a question going from pass to a non-pass, or the engine tests failing.
 
 ---
 
@@ -63,9 +65,9 @@
 | 02 | this plan, Appendix A | Record every `.md` file path and size as the baseline | Appendix A filled |
 | 03 | `SearchTests.md` (new) | Write 25 real questions LilyAi should answer, each with the expected file and section, plus an empty Baseline / Final result column | File committed |
 | 04 | `UmamusumeGameSpaceEngine.py` (read-only) and a repo-wide search | Record in Appendix B: (a) how docs are chunked, (b) which files are skipped (for example names starting with `_`) and whether `INDEX.md` and nested `README.md` files are indexed, (c) whether front matter is stripped or chunked as body text, (d) how files are matched by name, (e) every place, code or config, that references a `Guide/` path or an old filename (including the calculators) | Appendix B filled, with a file list for (e) |
-| 04c | `Guide/Optimization Plan.md`, `Guide/_SearchTests.md` (move) | Move both files out of the indexed docs folder into `tools/docs_optimization/` (as `Optimization Plan.md` and `SearchTests.md`). From here on, `DocHeaderSchema.md` and `Gaps.md` are created there too, without the leading underscore | The engine no longer indexes these files (the new folder is outside `LilyAiGameSpace/Umamusume/`), and no link to the old paths is left |
-| 04a | `tools/run_search_tests.py` (new, outside `Guide/`) and a workflow `.github/workflows/search-tests.yml` | Script reads `tools/docs_optimization/SearchTests.md` and runs each question through the engine in three ways: `search(query)`, `search(query, category="Guide")` and `context_for(query)`. It reports whether the expected file appears in the top 5 hits and whether the expected section is the top section. The workflow runs the script and uploads the result table as an artifact, so it can be run without a local machine | Workflow run prints a pass/fail table for all 25 |
-| 04b | `SearchTests.md`, Appendix C | Run the workflow on the untouched branch and record the **Baseline** column (for the unscoped and the `Guide` scoped search) | Baseline recorded for all 25. **Gate: no Track 1 work before this.** |
+| 04c | `Guide/Optimization Plan.md`, `Guide/_SearchTests.md` (move) | Move both files out of the indexed docs folder into `tools/docs_optimization/` (as `Optimization Plan.md` and `SearchTests.md`). From here on, `DocHeaderSchema.md`, `Gaps.md` and `PhaseLog.md` live there too | The engine no longer indexes these files (the new folder is outside `LilyAiGameSpace/Umamusume/`), and no link to the old paths is left |
+| 04a | `tools/run_search_tests.py` (new, outside `Guide/`) and `.github/workflows/search-tests.yml` | The script reads `tools/docs_optimization/SearchTests.md` and runs each question through the engine in three modes: `search` (top 5, all docs), `scoped` (top 5, limited to the expected doc's top folder) and `context` (what `context_for` injects into chat). Statuses: pass (expected doc and section), file (right doc, wrong section), alt (only an alternate doc), fail, none (context injects nothing). It can compare against a saved baseline and exit non-zero on a regression. The workflow runs on every push to this branch that touches the docs, the engine, the runner, the test table or itself, runs `tests/test_game_space_engine.py`, writes the tables to the job summary and uploads the JSON | A workflow run shows a table for all 25 questions |
+| 04b | `SearchTests.md`, `PhaseLog.md` | Take the first workflow run on the untouched docs folder as the **Baseline**: record the per-question result in the Baseline column and the totals in `PhaseLog.md`. Save the run's JSON as the baseline for `--compare` | Baseline recorded for all 25. **Gate: no Track 1 work before this.** |
 
 ### Track 1: Filename and link bugs
 
@@ -157,7 +159,7 @@ The routing file is named `GuideIndex.md`, not `INDEX.md`. The engine turns a fi
 
 | Phase | Target | Change | Done when |
 |-------|--------|--------|-----------|
-| 51 | `SearchTests.md`, Appendix C | Re-run the workflow from 04a and record the **Final** column next to the Baseline | Both columns filled, and no question that passed at baseline fails now |
+| 51 | `SearchTests.md`, `PhaseLog.md` | Run the workflow on the final state and record the **Final** column next to the Baseline, using `--compare` against the saved baseline | Both columns filled, and no question that passed at baseline fails now |
 | 52 | whole repo | Second audit, same scope as Phase 17 (links, old filenames, path strings, and the two docs that name files) | Zero broken links and zero old-name references |
 | 53 | failures from 51 | One tiny phase per failure (53a, 53b...), fixing only what that question needs | Re-test passes |
 | 54 | PR | Open a PR from `docs-optimization` and review the diff for accidental content changes | Diff shows only headers, names, links, pointers, notes and the named exceptions in rule 2 |
@@ -166,9 +168,9 @@ The routing file is named `GuideIndex.md`, not `INDEX.md`. The engine turns a fi
 
 ## 4. Order and dependencies
 
-- **04, 04c and 04b gate everything.** Findings can change or remove phases in Tracks 1, 2 and 4, the maintainer files must be out of the docs folder before the baseline, and the baseline must exist before any rename.
-- The plan, the test set, the header schema and the gap list live in `tools/docs_optimization/`. Any older text that says `_SearchTests.md`, `_DocHeaderSchema.md` or `_Gaps.md` means `SearchTests.md`, `DocHeaderSchema.md` and `Gaps.md` there.
-- Track 1 comes before Track 2, so headers are added to final filenames.
+- **04, 04c, 04a and 04b gate everything.** Findings can change or remove phases in Tracks 1, 2 and 4, the maintainer files must be out of the docs folder before the baseline, and the baseline must exist before any rename.
+- The plan, the test set, the phase log, the header schema and the gap list live in `tools/docs_optimization/`. Any older text that says `_SearchTests.md`, `_DocHeaderSchema.md` or `_Gaps.md` means `SearchTests.md`, `DocHeaderSchema.md` and `Gaps.md` there.
+- Track 1 comes before Track 2, so headers are added to final filenames. None of the 25 test questions expect a file that Track 1 renames.
 - Phase 18 depends on Phase 04 findings (only `title` and `aliases` are read).
 - Phases 33 to 37 must be done in order, with 36a inserted only if Phase 36 gives outcome C.
 - Track 6 comes last because `GuideIndex.md` depends on final names and headers.
@@ -178,15 +180,7 @@ The routing file is named `GuideIndex.md`, not `INDEX.md`. The engine turns a fi
 
 ## 5. Phase log
 
-| Phase | Status | Commit | Notes |
-|-------|--------|--------|-------|
-| 01 | done | `05406d2` | Branch `docs-optimization` already existed (head `057c186`, "docs: add Optimization Plan (54 phases)"), so it was reused. `main` was at `f7fb4ec04c6af37d82fc9cf2b5869b121c3b71ef` when checked, and code search of `main` already shows a copy of the v1 plan under `Guide/`. That commit replaced the v1 plan with v2 |
-| 02 | done | `151850c` | Appendix A filled: 40 `.md` files plus 1 `.xlsx`. Sizes are bytes as reported by GitHub on the branch head |
-| 03 | done (draft) | `1c94183` | The test set has 25 questions built around training Kitasan Black, each with a form for any trainee. Questions 1 to 4 come from the project owner, 5 to 25 are drafted from guide headings and need owner review |
-| 04 | done | `e805496` | Appendix B filled from the engine source and repo-wide searches. Six findings changed the plan (v2.1) |
-| 04c | done | this commit, plus two delete commits | Added this plan and `SearchTests.md` under `tools/docs_optimization/`, then deleted `Guide/Optimization Plan.md` and `Guide/_SearchTests.md`. A move is an add plus deletes through the GitHub API, so it is three commits. Owner also approved engine change 18a (built in Phase 18) |
-| 04a, 04b | not started | | 04a is next |
-| 05-54 (plus conditional 18a, 36a) | not started | | |
+The phase log lives in `PhaseLog.md` in this folder, so this plan only changes when the plan itself changes.
 
 ---
 
@@ -282,7 +276,7 @@ Recorded in Phase 04 from `LilyAiGameSpace/UmamusumeGameSpaceEngine.py` (blob `7
 - **`resolve()`** tries: exact alias, then the longest alias contained in the query (4 letters or more), then a unique substring match, then fuzzy matching at 0.8.
 - **Automatic chat context (`context_for`)** fires when a message contains a multi-word alias, or a single-word alias of 5 letters or more that is not in the engine's generic list (readme, overview, guide, guides, skill, skills, character, characters, support, card, cards, race, races, training, glossary, list). "index" is not in that list.
 - **Renames** change the doc id and drop the old filename alias (for example `Guide1`), unless the old name is kept in front matter `aliases`. Titles come from the H1 and do not change.
-- **`doc_boost` effect:** a query that names a character (for example "Kitasan Black") boosts every matching section of `Character/Kitasan_Black`, so that doc is likely to outrank the guides. Unscoped searches for the Kitasan questions are expected to fail more often. `search(..., category="Guide")` avoids this, and `context_for` for a message naming a character injects that character's sections, not guide sections.
+- **`doc_boost` effect:** a query that names a character (for example "Kitasan Black") boosts every matching section of `Character/Kitasan_Black`, so that doc is likely to outrank the guides. Unscoped searches for the Kitasan questions are expected to fail more often. A search scoped to a folder avoids this, and `context_for` for a message naming a character injects that character's sections, not guide sections.
 
 ### (e) References to doc paths outside the docs
 
@@ -301,12 +295,7 @@ Recorded in Phase 04 from `LilyAiGameSpace/UmamusumeGameSpaceEngine.py` (blob `7
 
 ## Appendix C: Search test results
 
-Per-question results live in the table inside `SearchTests.md`. This appendix holds only the summary. Each run is recorded for the unscoped search and the `Guide` scoped search.
-
-| Run | Phase | Unscoped passed | Guide-scoped passed | Date |
-|-----|-------|-----------------|---------------------|------|
-| Baseline | 04b | _/25 | _/25 | |
-| Final | 51 | _/25 | _/25 | |
+Per-question results are in the table inside `SearchTests.md` and in each workflow run's job summary. The totals for the baseline and final runs are in `PhaseLog.md`.
 
 ---
 
@@ -327,7 +316,7 @@ Per-question results live in the table inside `SearchTests.md`. This appendix ho
 **v2 to v2.1 (from the Phase 04 audit)**
 
 - Added Phase 04c: move the plan and maintainer files out of the indexed docs folder.
-- Phase 04a now runs through a workflow and tests three search modes (unscoped, `Guide` scoped, `context_for`).
+- Phase 04a now runs through a workflow and tests three search modes.
 - Phase 18 now has header format rules and a decision on engine change 18a, because only `title` and `aliases` are read.
 - Added Phase 27a: the `Racelist.md` header is written by the generating script. Added ground rule 9.
 - Renamed `INDEX.md` to `GuideIndex.md` (a single-word "index" alias would trigger automatic chat context).
@@ -341,3 +330,10 @@ Per-question results live in the table inside `SearchTests.md`. This appendix ho
 - The plan and test set now live in `tools/docs_optimization/`, outside the indexed folder.
 - Engine change 18a is approved and is part of Phase 18.
 - Ground rule 1 notes that a file move is an add commit plus delete commits.
+
+**v2.2 to v2.3 (Phase 04a)**
+
+- The phase log moved to `PhaseLog.md`, so routine status updates no longer rewrite this plan.
+- Phase 04a and 04b describe the runner as built: three modes (`search`, `scoped`, `context`), five statuses, a `--compare` option, and a workflow that runs on every docs push.
+- Added ground rule 10: every docs commit gets a search-test run, and a pass turning into a non-pass blocks the phase.
+- Appendix C now points to `PhaseLog.md`.
