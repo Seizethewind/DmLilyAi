@@ -139,7 +139,7 @@ Phases 33 to 37 (and 36a if triggered) must be done in order. The monolith is re
 | 42 | `INDEX.md` (new) | Routing table: question type to file and section, built from `_SearchTests.md`. Confirm from Appendix B that `INDEX.md` is indexed by the engine | Every test question appears, and indexing is confirmed |
 | 43 | `Readme.md`, `INDEX.md` | Move the guide library (section 5) into `INDEX.md` (named exception to rule 2), leave the club docs and a link in `Readme.md` | Readme covers only club docs, and nothing was lost |
 | 44 | `INDEX.md` | Add a "Server" column (Global / JP / Both) from the headers | Column filled |
-| 45 | `INDEX.md` | Link the Global-to-JP terminology map (in `AdvanceCareerGuide.md`) and the `Glossary` folder | Both links resolve |
+| 45 | `INDEX.md` | Link the Global-to-JP terminology map (in `AdvanceCareerGuide.md`) and the `Glossary` folder (found at `../Glossary/Glossary.md`, outside `Guide/`) | Both links resolve |
 | 46 | The 10 largest files | Add a short block: "Answers: ... / Does not cover: ..." | 10 blocks added |
 | 47 | Scenario docs | Add "See also" links from each scenario to its support card section and deck advice | Links resolve |
 | 48 | `Career/Scenario/README.md` (new) | Comparison table: scenario, stat caps, release, doc link. Confirm from Appendix B that nested `README.md` files are indexed | One row per scenario doc |
@@ -173,8 +173,9 @@ Phases 33 to 37 (and 36a if triggered) must be done in order. The monolith is re
 | Phase | Status | Commit | Notes |
 |-------|--------|--------|-------|
 | 01 | done | `05406d2` | Branch `docs-optimization` already existed (head `057c186`, "docs: add Optimization Plan (54 phases)"), so it was reused. `main` was at `f7fb4ec04c6af37d82fc9cf2b5869b121c3b71ef` when checked. That commit replaced the v1 plan with v2 |
-| 02 | done | this commit | Appendix A filled: 40 `.md` files plus 1 `.xlsx`. Sizes are bytes as reported by GitHub on the branch head. See the notes under Appendix A |
-| 03-54 (plus 04a, 04b, and conditional 18a, 36a) | not started | | Note for Phase 04: this plan file lives inside `Guide/`, so check whether the engine indexes it |
+| 02 | done | `151850c` | Appendix A filled: 40 `.md` files plus 1 `.xlsx`. Sizes are bytes as reported by GitHub on the branch head. See the notes under Appendix A |
+| 03 | done (draft) | this commit | `_SearchTests.md` has 25 questions built around training Kitasan Black, each with a form for any trainee. Questions 1 to 4 come from the project owner, 5 to 25 are drafted from guide headings and need owner review. Expected sections were checked against the files |
+| 04-54 (plus 04a, 04b, and conditional 18a, 36a) | not started | | Note for Phase 04: this plan file lives inside `Guide/`, so check whether the engine indexes it |
 
 ---
 
@@ -231,9 +232,10 @@ Recorded in Phase 02 from branch `docs-optimization` (head `05406d2`). Sizes are
 **Notes found while listing:**
 
 - `Guide6.md`, `Guide7.md` and `Guide9.md` are almost the same size (20,273, 20,252 and 20,257 bytes). This fits the "ends mid-section" issue (I4) and suggests they were cut at a size limit. Worth checking in Phase 28.
-- There is no `Glossary` folder under `Guide/`, but Phase 45 links to one. Locate it elsewhere in the repo during Phase 04, or drop that part of Phase 45.
+- The `Glossary` folder that Phase 45 links to is not under `Guide/`. It exists one level up, at `LilyAiGameSpace/Umamusume/Glossary/Glossary.md` (found in Phase 03). Phase 45 should link to `../Glossary/Glossary.md`.
+- Other docs the test questions use also live outside `Guide/`: `../Character/` (for example `Kitasan_Black.md`) and `../Support Cards/`. Phase 04 should check that the engine indexes them under the same rules.
 - Two files are both named `Readme.md` (`Guide/Readme.md` and `Umamusume Global Quickstart Guide/Readme.md`). Keep this in mind for Phase 04(b) and (d), since name matching could confuse them.
-- `INDEX.md`, `_SearchTests.md`, `_DocHeaderSchema.md` and `_Gaps.md` do not exist yet, as expected.
+- `INDEX.md`, `_DocHeaderSchema.md` and `_Gaps.md` do not exist yet, as expected. `_SearchTests.md` was added in Phase 03.
 
 ## Appendix B: Engine audit findings
 
@@ -241,11 +243,12 @@ _To be filled in Phase 04. Required items: (a) chunking, (b) skipped files and i
 
 ## Appendix C: Search test results
 
-_Baseline filled in Phase 04b, Final filled in Phase 51._
+Per-question results live in the table inside `_SearchTests.md`. This appendix holds only the summary.
 
-| # | Question | Expected file and section | Baseline | Final |
-|---|----------|---------------------------|----------|-------|
-| 1-25 | | | | |
+| Run | Phase | Passed | Date |
+|-----|-------|--------|------|
+| Baseline | 04b | _/25 | |
+| Final | 51 | _/25 | |
 
 ---
 
