@@ -96,6 +96,21 @@ class GameSpaceEngineTests(unittest.TestCase):
         path.unlink()
         self.assertIsNone(self.engine.resolve("silence suzuka"))
 
+    def test_skips_dot_and_underscore_files_and_folders(self):
+        guide = Path(self.tmp.name) / "Guide"
+        (guide / "_Notes.md").write_text("# Notes\n\nArima Kinen working notes.\n", encoding="utf-8")
+        (guide / ".Hidden.md").write_text("# Hidden\n\nArima Kinen hidden.\n", encoding="utf-8")
+        (guide / "_meta").mkdir()
+        (guide / "_meta" / "Plan.md").write_text("# Plan\n\nArima Kinen plan.\n", encoding="utf-8")
+        (guide / ".meta").mkdir()
+        (guide / ".meta" / "Plan.md").write_text("# Plan\n\nArima Kinen plan.\n", encoding="utf-8")
+        self.engine.refresh(force=True)
+        ids = {d.id for d in self.engine.list_docs()}
+        self.assertEqual(ids, {"Character/Special_Week", "Guide/RaceList/Racelist"})
+        self.assertEqual(self.engine.search("arima kinen")[0].doc_id, "Guide/RaceList/Racelist")
+        # a name that merely contains an underscore is still indexed
+        self.assertIn("Character/Special_Week", ids)
+
 
 if __name__ == "__main__":
     unittest.main()
