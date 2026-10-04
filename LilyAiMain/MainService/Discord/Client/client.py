@@ -20,11 +20,20 @@ from LilyAiCore.ExternalServices.Discord.helpers import split_reply
 from LilyAiCore.ExternalServices.Discord.reconnect_state import ReconnectState
 from LilyAiCore.Logging.logger import get_logger
 from LilyAiMain.MainService.bootstrap import App
-from LilyAiMain.MainService.Interaction.messages import IncomingMessage, MenuItem, OutgoingMessage
+from LilyAiMain.MainService.Interaction.messages import ImageAttachment, IncomingMessage, MenuItem, OutgoingMessage
+from LilyAiMain.MainService.Interaction.Workflows.career_review import MAX_IMAGES
 
 log = get_logger("discord.client")
 
-_NO_CONTENT_REPLY = "I can't read images, files, or stickers yet - could you describe what you'd like in words?"
+_NO_CONTENT_REPLY = (
+    "I can read screenshots of a trainee's details screen, but not other files or stickers yet - "
+    "could you describe what you'd like in words?"
+)
+
+# Screenshots are sent to a vision model as base64, which Groq limits to about 4 MB per image.
+MAX_IMAGE_BYTES = 4 * 1024 * 1024
+_IMAGE_MIMES = {"image/png", "image/jpeg", "image/webp"}
+_EXT_MIME = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg", "webp": "image/webp"}
 
 
 class FeedbackButton(discord.ui.DynamicItem[discord.ui.Button], template=r"lily_fb:(?P<rating>up|down):(?P<reply_id>[0-9a-f]{6,32})"):
@@ -176,6 +185,36 @@ class LilyDiscordClient(discord.Client):
         self._seen_message_id_set.add(message_id)
         return False
 
+    async def _read_images(self, message: discord.Message) -> tuple[list[ImageAttachment], str]:
+        """Image attachments on a DM, downloaded into memory (nothing is written to disk). Returns the images and,
+        if any were skipped for being too large or failing to download, a notice to show the user."""
+        images: list[ImageAttachment] = []
+        skipped: list[str] = []
+        for att in message.attachments:
+            mime = (att.content_type or "").split(";")[0].strip().lower()
+            if not mime:
+                mime = _EXT_MIME.get(att.filename.lower().rsplit(".", 1)[-1], "")
+            if mime not in _IMAGE_MIMES:
+                continue
+            if len(images) >= MAX_IMAGES:
+                skipped.append(att.filename)
+                continue
+            if att.size > MAX_IMAGE_BYTES:
+                skipped.append(att.filename)
+                continue
+            try:
+                data = await att.read()
+            except discord.HTTPException as e:
+                log.warning("couldn't download attachment %s: %s", att.filename, e)
+                skipped.append(att.filename)
+                continue
+            images.append(ImageAttachment(data, mime, att.filename))
+        notice = ""
+        if skipped:
+            notice = (f"I skipped {len(skipped)} image(s) ({', '.join(skipped[:3])}): each must be under "
+                      f"{MAX_IMAGE_BYTES // (1024 * 1024)} MB and I read at most {MAX_IMAGES} per message.")
+        return images, notice
+
     async def on_message(self, message: discord.Message):
         if message.guild is not None:
             await self._relay_channel_message(message)
@@ -184,16 +223,22 @@ class LilyDiscordClient(discord.Client):
             return
         if self._already_seen(message.id):
             return
-        if not message.content.strip():
-            if message.attachments or message.stickers:
+        images, notice = await self._read_images(message)
+        if not message.content.strip() and not images:
+            if notice:
+                await message.channel.send(notice)
+            elif message.attachments or message.stickers:
                 await message.channel.send(_NO_CONTENT_REPLY)
             return
+        if notice:
+            await message.channel.send(notice)
         async with message.channel.typing():
-            await self.process(message.author.id, message.author.display_name, message.content, message.channel)
+            await self.process(message.author.id, message.author.display_name, message.content, message.channel, images)
 
-    async def process(self, user_id: int, name: str, text: str, channel: discord.abc.Messageable):
+    async def process(self, user_id: int, name: str, text: str, channel: discord.abc.Messageable,
+                      images: list[ImageAttachment] | None = None):
         try:
-            outgoing = await self.app.router.route(IncomingMessage(str(user_id), text, name, "discord"))
+            outgoing = await self.app.router.route(IncomingMessage(str(user_id), text, name, "discord", images or []))
             for out in outgoing:
                 await self._send(channel, out, str(user_id))
         except Exception as e:
@@ -228,8 +273,8 @@ class LilyDiscordClient(discord.Client):
     # ---- live channel relay (Relay page "Channel" tab) ----
 
     def list_channels(self) -> list[dict]:
-        """Every text AND voice channel (voice channels support Discord's "text in voice
-        chat"), across every server the bot is in, that it can actually post in - detected
+        """Every text AND voice channel (voice channels support Discord's "text in voice"
+        chat), across every server the bot is in, that it can actually post in - detected
         straight from the live gateway connection (no extra Discord API calls). Voice channels
         are included so an admin can also relay into one (e.g. to drop a link/file for people
         in a call); this only adds them to the picker - the bot never joins voice audio/video
