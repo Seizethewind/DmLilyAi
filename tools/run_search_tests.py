@@ -19,6 +19,11 @@ Each mode gets one status per question:
 
 The number after @ is the rank of the first matching hit.
 
+The report also measures section sizes (characters of text in each indexed section): the size of
+each expected section, the size of the top search hit, the largest sections in the index, and how
+many sections are too long for one read (more than 6,000 and more than 12,000 characters). This
+tests the Phase 04d idea that very large sections outrank small, focused ones.
+
 Usage:
     python tools/run_search_tests.py
     python tools/run_search_tests.py --markdown out.md --json results.json
@@ -43,9 +48,14 @@ from LilyAiGameSpace.UmamusumeGameSpaceEngine import UmamusumeGameSpaceEngine  #
 TESTS_FILE = REPO_ROOT / "tools" / "docs_optimization" / "SearchTests.md"
 MODES = ("search", "scoped", "context")
 TOP_N = 5
+READ_DEFAULT = 6_000
+READ_MAX = 12_000
 
 _ROW_RE = re.compile(r"^\|\s*(\d+)\s*\|")
 _TICK_RE = re.compile(r"`([^`]+)`")
+
+# (doc id, section path) -> characters of section text. Filled in main().
+SIZES: dict[tuple[str, str], int] = {}
 
 
 def norm(text: str) -> str:
@@ -94,6 +104,27 @@ def parse_tests(path: Path) -> list[TestCase]:
     return tests
 
 
+def section_sizes(engine: UmamusumeGameSpaceEngine) -> dict[tuple[str, str], int]:
+    """Size of every visible section. Reads the engine's index, so it returns {} if that changes."""
+    sizes: dict[tuple[str, str], int] = {}
+    for doc in getattr(engine, "_docs", {}).values():
+        for s in doc.visible():
+            sizes[(doc.id, s.path)] = len(s.text)
+    return sizes
+
+
+def expected_size(t: TestCase) -> int | None:
+    """Largest section of the expected doc that matches an expected heading (whole doc if none named)."""
+    found = [n for (d, p), n in SIZES.items()
+             if d == t.doc_id and (not t.sections or any(norm(s) in norm(p) for s in t.sections))]
+    return max(found) if found else None
+
+
+def label(doc: str, sec: str) -> str:
+    n = SIZES.get((doc, sec))
+    return f"{doc} > {sec}" + (f" [{n:,} chars]" if n is not None else "")
+
+
 def evaluate(hits: list[tuple[str, str]], t: TestCase) -> dict:
     first_pass = first_file = first_alt = None
     for rank, (doc, sec) in enumerate(hits, 1):
@@ -111,7 +142,7 @@ def evaluate(hits: list[tuple[str, str]], t: TestCase) -> dict:
         status, rank = "alt", first_alt
     else:
         status, rank = "fail", None
-    return {"status": status, "rank": rank, "hits": [f"{d} > {s}" for d, s in hits]}
+    return {"status": status, "rank": rank, "hits": [label(d, s) for d, s in hits]}
 
 
 def context_hits(engine: UmamusumeGameSpaceEngine, message: str) -> list[tuple[str, str]]:
@@ -130,20 +161,50 @@ def context_hits(engine: UmamusumeGameSpaceEngine, message: str) -> list[tuple[s
 def run(engine: UmamusumeGameSpaceEngine, tests: list[TestCase]) -> list[dict]:
     results = []
     for t in tests:
+        search_hits = [(h.doc_id, h.section) for h in engine.search(t.question, limit=TOP_N)]
         modes = {
-            "search": evaluate([(h.doc_id, h.section) for h in engine.search(t.question, limit=TOP_N)], t),
+            "search": evaluate(search_hits, t),
             "scoped": evaluate(
                 [(h.doc_id, h.section) for h in engine.search(t.question, category=t.category, limit=TOP_N)], t),
         }
         ctx = context_hits(engine, t.question)
         modes["context"] = evaluate(ctx, t) if ctx else {"status": "none", "rank": None, "hits": []}
-        results.append({"num": t.num, "question": t.question, "doc_id": t.doc_id,
-                        "sections": t.sections, "alts": t.alt_ids, "modes": modes})
+        results.append({
+            "num": t.num, "question": t.question, "doc_id": t.doc_id,
+            "sections": t.sections, "alts": t.alt_ids, "modes": modes,
+            "expected_chars": expected_size(t),
+            "top_hit_chars": SIZES.get(search_hits[0]) if search_hits else None,
+        })
     return results
 
 
 def cell(m: dict) -> str:
     return m["status"] + (f"@{m['rank']}" if m["rank"] else "")
+
+
+def chars(n: int | None) -> str:
+    return f"{n:,}" if n is not None else "?"
+
+
+def size_report() -> list[str]:
+    if not SIZES:
+        return ["## Section sizes", "", "(not available: the engine's index could not be read)", ""]
+    total = len(SIZES)
+    over_read = sum(1 for n in SIZES.values() if n > READ_DEFAULT)
+    over_max = sum(1 for n in SIZES.values() if n > READ_MAX)
+    text_total = sum(SIZES.values())
+    top = sorted(SIZES.items(), key=lambda kv: -kv[1])[:15]
+    top_share = sum(n for _, n in top) / text_total * 100 if text_total else 0
+    lines = ["## Section sizes", "",
+             f"{total:,} sections, {text_total:,} characters of text. "
+             f"{over_read:,} sections are longer than a default read ({READ_DEFAULT:,}), "
+             f"{over_max:,} are longer than the maximum read ({READ_MAX:,}), so a read cuts them off. "
+             f"The 15 largest hold {top_share:.0f}% of all text.", "",
+             "| Rank | Section | Characters |", "|---|---|---|"]
+    for i, ((d, p), n) in enumerate(top, 1):
+        lines.append(f"| {i} | `{d}` > {p} | {n:,} |")
+    lines.append("")
+    return lines
 
 
 def render(results: list[dict], regressions: list[str] | None = None) -> str:
@@ -160,11 +221,16 @@ def render(results: list[dict], regressions: list[str] | None = None) -> str:
     if regressions is not None:
         lines += ["", f"**Regressions against the baseline:** {len(regressions)}"]
         lines += [f"- {r}" for r in regressions]
-    lines += ["", "## Per question", "", "| # | Question | Expected | search | scoped | context |", "|---|---|---|---|---|---|"]
+    lines += size_report()
+    lines += ["## Per question", "",
+              "Expected chars = size of the expected section. Top hit chars = size of the first `search` hit.", "",
+              "| # | Question | Expected | search | scoped | context | Expected chars | Top hit chars |",
+              "|---|---|---|---|---|---|---|---|"]
     for r in results:
         q = r["question"] if len(r["question"]) <= 70 else r["question"][:67] + "..."
         m = r["modes"]
-        lines.append(f"| {r['num']} | {q} | `{r['doc_id']}` | {cell(m['search'])} | {cell(m['scoped'])} | {cell(m['context'])} |")
+        lines.append(f"| {r['num']} | {q} | `{r['doc_id']}` | {cell(m['search'])} | {cell(m['scoped'])} "
+                     f"| {cell(m['context'])} | {chars(r['expected_chars'])} | {chars(r['top_hit_chars'])} |")
     lines += ["", "## Top hits where a mode did not pass", ""]
     for r in results:
         for mode in MODES:
@@ -206,6 +272,7 @@ def main() -> int:
         return 1
     engine = UmamusumeGameSpaceEngine()
     print(f"Indexed {len(engine.list_docs())} docs from {engine.root}")
+    SIZES.update(section_sizes(engine))
     missing = [t for t in tests if engine.resolve(t.doc_id) is None]
     for t in missing:
         print(f"WARNING: Q{t.num} expects {t.doc_id}, which is not an indexed doc", file=sys.stderr)
