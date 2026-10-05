@@ -1,0 +1,53 @@
+name: Search tests
+
+# Runs the Guide search tests (tools/docs_optimization/SearchTests.md) against the docs engine.
+# Runs on every push to docs-optimization that touches the docs, the engine, the runner or the
+# test table, so each phase of the optimization plan gets a result. It can also be started by hand
+# (Actions tab, "Run workflow") once this file is on the default branch.
+# Read the result on the run page (job summary), or download the search-test-results artifact.
+
+on:
+  push:
+    branches: [docs-optimization]
+    paths:
+      - "LilyAiGameSpace/Umamusume/**"
+      - "LilyAiGameSpace/UmamusumeGameSpaceEngine.py"
+      - "tools/run_search_tests.py"
+      - "tools/docs_optimization/SearchTests.md"
+      - ".github/workflows/search-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  search-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Engine unit tests
+        id: unit
+        continue-on-error: true
+        run: |
+          pip install pytest
+          python -m pytest tests/test_game_space_engine.py -q
+
+      - name: Run search tests
+        run: python tools/run_search_tests.py --markdown "$GITHUB_STEP_SUMMARY" --json search_test_results.json
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-test-results
+          path: search_test_results.json
+
+      - name: Report engine test outcome
+        if: steps.unit.outcome == 'failure'
+        run: |
+          echo "::warning::tests/test_game_space_engine.py failed. Rename phases must not be committed while it fails."
+          echo "**Warning:** tests/test_game_space_engine.py failed on this commit." >> "$GITHUB_STEP_SUMMARY"
