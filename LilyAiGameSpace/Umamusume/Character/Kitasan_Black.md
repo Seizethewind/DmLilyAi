@@ -1,3 +1,203 @@
+# Kitasan Black (Original) | Uma Musume | GameTora
+[< Back to character list](https://gametora.com/umamusume/characters)
+
+\[Gilded Shrine to Glory\]
+
+Kitasan Black
+-------------
+
+⭐⭐⭐
+
+Japanese name
+
+キタサンブラック
+
+Release date
+
+2026-03-12
+
+![Kitasan Black (Original)](https://gametora.com/images/umamusume/characters/chara_stand_1068_106801.png)
+
+Japanese name
+
+キタサンブラック
+
+Voice actor
+
+Release date
+
+2026-03-12
+
+Birthday
+
+???
+
+Height
+
+cm
+
+Three sizes
+
+???
+
+Obtained from
+-------------
+
+Standard Gacha
+
+Gallery
+-------
+
+Base stats
+----------
+
+Stat bonuses
+------------
+
+![Speed](https://gametora.com/images/umamusume/icons/utx_ico_obtain_00.png)
+
+20%
+
+![Stamina](https://gametora.com/images/umamusume/icons/utx_ico_obtain_01.png)
+
+10%
+
+![Power](https://gametora.com/images/umamusume/icons/utx_ico_obtain_02.png)
+
+\-
+
+![Guts](https://gametora.com/images/umamusume/icons/utx_ico_obtain_03.png)
+
+\-
+
+![Wit](https://gametora.com/images/umamusume/icons/utx_ico_obtain_04.png)
+
+\-
+
+Aptitude
+--------
+
+Objectives
+----------
+
+### Junior
+
+#### 1\. Participate in the Junior Make Debut
+
+Turn 12
+
+Turf – 2000m – Medium
+
+### Classic
+
+![](https://gametora.com/images/umamusume/icons/fan.png)
+
+#### 2\. Have at least 5000 fans
+
+Turn 30 (previous + 17)
+
+Classic Class
+
+,
+
+Late March
+
+#### 3\. Place 3rd or better in the St. Lite Kinen
+
+Turn 42 (previous + 11)
+
+Classic Class
+
+,
+
+Late September
+
+G2 – Turf – 2200m – Medium
+
+#### 4\. Place 3rd or better in the Kikuka Sho
+
+Turn 44 (previous + 1)
+
+Classic Class
+
+,
+
+Late October
+
+G1 – Turf – 3000m – Long
+
+#### 5\. Place 3rd or better in the Arima Kinen
+
+Turn 48 (previous + 3)
+
+Classic Class
+
+,
+
+Late December
+
+G1 – Turf – 2500m – Long
+
+### Senior
+
+#### 6\. Place 3rd or better in the Osaka Hai
+
+Turn 54 (previous + 5)
+
+G1 – Turf – 2000m – Medium
+
+#### 7\. Place 3rd or better in the Tenno Sho (Spring)
+
+Turn 56 (previous + 1)
+
+G1 – Turf – 3200m – Long
+
+#### 8\. Place 3rd or better in the Takarazuka Kinen
+
+Turn 60 (previous + 3)
+
+G1 – Turf – 2200m – Medium
+
+#### 9\. Place 3rd or better in the Tenno Sho (Autumn)
+
+Turn 68 (previous + 7)
+
+Senior Class
+
+,
+
+Late October
+
+G1 – Turf – 2000m – Medium
+
+#### 10\. Place 3rd or better in the Japan Cup
+
+Turn 70 (previous + 1)
+
+Senior Class
+
+,
+
+Late November
+
+G1 – Turf – 2400m – Medium
+
+#### 11\. Place 1st in the Arima Kinen
+
+Turn 72 (previous + 1)
+
+Senior Class
+
+,
+
+Late December
+
+G1 – Turf – 2500m – Long
+
+**Newest Scenario**
+
+**Newest Update**
+
 # Kitasan Black
 
 **Japanese name:** キタサンブラック
