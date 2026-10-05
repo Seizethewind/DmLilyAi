@@ -1,18 +1,20 @@
-UMAMUSUME AI REFERENCE — G1
+# UMAMUSUME AI REFERENCE — G1
 
 «Source module: Guide 1 — UmaMusu Support Card Evaluation Doc
 Source author: celery6305
 Primary purpose: support-card evaluation methodology and card-property reference.
 
-This module is an extension of "CommunityGuide_AI.md".
+This module is an extension of "CommunityGuide_AI_updated.md".
 
 Source scope: Guide 1 evaluates support cards primarily for stat gain and PvP usefulness using a simulation model based on JP scenario/meta parameters. Its rankings are evaluations, not universal game facts.»
 
+> **NOTE — INCOMPLETE FILE:** this module stops partway through the Stamina cards (section 13.03). The remaining Stamina, Power, Guts, Wisdom, non-MLB and Group/Friend card entries were never saved. Do not assume a card is missing from the game because it is missing here.
+
 ---
 
-01. SOURCE_SCOPE
+## 01. SOURCE_SCOPE
 
-DOCUMENT_PURPOSE
+### DOCUMENT_PURPOSE
 
 FACT
 
@@ -23,7 +25,7 @@ FACT
 
 SOURCE: "G1"
 
-CURRENT_SCENARIO_CONTEXT
+### CURRENT_SCENARIO_CONTEXT
 
 META
 
@@ -32,7 +34,7 @@ META
 
 SOURCE: "G1"
 
-MLB_SCOPE
+### MLB_SCOPE
 
 FACT
 
@@ -41,7 +43,7 @@ FACT
 
 SOURCE: "G1"
 
-GLOBAL_TIME_SCOPE
+### GLOBAL_TIME_SCOPE
 
 LIMITATION
 
@@ -52,9 +54,9 @@ SOURCE: "G1"
 
 ---
 
-02. SUPPORT_CARD_VALUE_MODEL
+## 02. SUPPORT_CARD_VALUE_MODEL
 
-02.01 MAIN_TRAINING_VALUE
+### 02.01 MAIN_TRAINING_VALUE
 
 RELATION
 
@@ -67,7 +69,7 @@ Guide 1 identifies the main contributors to a support card's ability to raise it
 
 SOURCE: "G1"
 
-02.02 CROSS_TRAINING_VALUE
+### 02.02 CROSS_TRAINING_VALUE
 
 RELATION
 
@@ -80,7 +82,7 @@ The main contributors identified by Guide 1 are:
 
 SOURCE: "G1"
 
-02.03 OTHER_STAT_VALUE
+### 02.03 OTHER_STAT_VALUE
 
 RELATION
 
@@ -91,7 +93,7 @@ Guide 1 also identifies the following as important contributors to total stat va
 
 SOURCE: "G1"
 
-02.04 SUPPORT_CARD_VALUE_SUMMARY
+### 02.04 SUPPORT_CARD_VALUE_SUMMARY
 
 MODEL
 
@@ -111,9 +113,9 @@ IMPORTANT
 
 ---
 
-03. SUPPORT_CARD_SIMULATION
+## 03. SUPPORT_CARD_SIMULATION
 
-03.01 GENERAL_METHOD
+### 03.01 GENERAL_METHOD
 
 EVALUATION
 
@@ -131,7 +133,7 @@ For each possible situation:
 
 SOURCE: "G1"
 
-03.02 TRAINING_PHASES
+### 03.02 TRAINING_PHASES
 
 FACT
 
@@ -141,7 +143,7 @@ FACT
 
 SOURCE: "G1"
 
-03.03 TRAINING_SELECTION
+### 03.03 TRAINING_SELECTION
 
 EVALUATION
 
@@ -156,7 +158,7 @@ It:
 
 SOURCE: "G1"
 
-03.04 EXAMPLE_CONFIGURATION
+### 03.04 EXAMPLE_CONFIGURATION
 
 SOURCE_EXAMPLE
 
@@ -174,9 +176,9 @@ SOURCE: "G1"
 
 ---
 
-04. ENERGY_AND_TURNS_IN_G1_MODEL
+## 04. ENERGY_AND_TURNS_IN_G1_MODEL
 
-04.01 ENERGY
+### 04.01 ENERGY
 
 EVALUATION
 
@@ -188,7 +190,7 @@ EVALUATION
 
 SOURCE: "G1"
 
-04.02 ENERGY_GAIN
+### 04.02 ENERGY_GAIN
 
 RELATION
 
@@ -197,7 +199,7 @@ RELATION
 
 SOURCE: "G1"
 
-04.03 INITIAL_BOND
+### 04.03 INITIAL_BOND
 
 RELATION
 
@@ -208,9 +210,9 @@ SOURCE: "G1"
 
 ---
 
-05. RACE_AND_EVENT_CONTRIBUTION
+## 05. RACE_AND_EVENT_CONTRIBUTION
 
-05.01 RACE_STATS
+### 05.01 RACE_STATS
 
 FACT
 
@@ -218,7 +220,7 @@ FACT
 
 SOURCE: "G1"
 
-05.02 EVENT_STATS
+### 05.02 EVENT_STATS
 
 FACT
 
@@ -226,7 +228,7 @@ FACT
 
 SOURCE: "G1"
 
-05.03 RACE_BONUS
+### 05.03 RACE_BONUS
 
 RELATION
 
@@ -235,7 +237,7 @@ RELATION
 
 SOURCE: "G1"
 
-05.04 RACE_BONUS_BREAKPOINT
+### 05.04 RACE_BONUS_BREAKPOINT
 
 VALUE / EVALUATION
 
@@ -252,9 +254,9 @@ AI_RULE
 
 ---
 
-06. SUPPORT_CARD_BONUSES
+## 06. SUPPORT_CARD_BONUSES
 
-06.01 BONUS_PRIORITY_IN_G1_MODEL
+### 06.01 BONUS_PRIORITY_IN_G1_MODEL
 
 EVALUATION
 
@@ -275,7 +277,7 @@ This is an evaluation-model ordering, not a universal mechanical priority.
 
 ---
 
-06.02 FLAT_STAT_BONUS
+### 06.02 FLAT_STAT_BONUS
 
 EVALUATION
 
@@ -292,7 +294,7 @@ SOURCE: "G1"
 
 ---
 
-06.03 TRAINING_BONUS
+### 06.03 TRAINING_BONUS
 
 RELATION
 
@@ -303,7 +305,7 @@ SOURCE: "G1"
 
 ---
 
-06.04 MOTIVATION_BONUS
+### 06.04 MOTIVATION_BONUS
 
 EVALUATION
 
@@ -323,7 +325,7 @@ SOURCE: "G1"
 
 ---
 
-06.05 FRIENDSHIP_BONUS
+### 06.05 FRIENDSHIP_BONUS
 
 RELATION
 
@@ -334,7 +336,7 @@ SOURCE: "G1"
 
 ---
 
-06.06 SPECIALTY_RATE
+### 06.06 SPECIALTY_RATE
 
 RELATION
 
@@ -355,7 +357,7 @@ The diminishing-value observation is an evaluation result, not a universal mathe
 
 ---
 
-06.07 INITIAL_BOND
+### 06.07 INITIAL_BOND
 
 RELATION
 
@@ -366,7 +368,7 @@ SOURCE: "G1"
 
 ---
 
-06.08 RACE_BONUS
+### 06.08 RACE_BONUS
 
 RELATION
 
@@ -377,7 +379,7 @@ SOURCE: "G1"
 
 ---
 
-06.09 EVENT_STATS
+### 06.09 EVENT_STATS
 
 RELATION
 
@@ -387,9 +389,9 @@ SOURCE: "G1"
 
 ---
 
-07. SKILL_POINT_VALUE
+## 07. SKILL_POINT_VALUE
 
-07.01 SKILL_POINTS
+### 07.01 SKILL_POINTS
 
 EVALUATION
 
@@ -399,7 +401,7 @@ The source identifies Skill Point bonuses as an important contributor to practic
 
 SOURCE: "G1"
 
-07.02 HINT_DISCOUNTS
+### 07.02 HINT_DISCOUNTS
 
 RELATION
 
@@ -408,7 +410,7 @@ RELATION
 
 SOURCE: "G1"
 
-07.03 CARD_SCORE_VS_SKILLS
+### 07.03 CARD_SCORE_VS_SKILLS
 
 EVALUATION
 
@@ -428,9 +430,9 @@ SOURCE: "G1"
 
 ---
 
-08. SCENARIO_SIMULATION_LIMITATIONS
+## 08. SCENARIO_SIMULATION_LIMITATIONS
 
-08.01 GENERAL_SCENARIO_MODEL
+### 08.01 GENERAL_SCENARIO_MODEL
 
 LIMITATION
 
@@ -440,7 +442,7 @@ The model instead aims to provide a more general evaluation.
 
 SOURCE: "G1"
 
-08.02 SCENARIO_PARAMETERS
+### 08.02 SCENARIO_PARAMETERS
 
 FACT
 
@@ -453,7 +455,7 @@ The evaluation can still adjust parameters for:
 
 SOURCE: "G1"
 
-08.03 REASON_FOR_GENERALIZED_MODEL
+### 08.03 REASON_FOR_GENERALIZED_MODEL
 
 SOURCE_CONTEXT
 
@@ -464,7 +466,7 @@ STATUS
 
 - Methodology explanation; not gameplay mechanic.
 
-08.04 EFFECT_ON_CARD_EVALUATION
+### 08.04 EFFECT_ON_CARD_EVALUATION
 
 LIMITATION
 
@@ -477,9 +479,9 @@ SOURCE: "G1"
 
 ---
 
-09. COMPARISON_DECK_ASSUMPTION
+## 09. COMPARISON_DECK_ASSUMPTION
 
-09.01 FIXED_COMPANION_CARDS
+### 09.01 FIXED_COMPANION_CARDS
 
 CONDITION
 
@@ -491,7 +493,7 @@ When comparing one support card against another:
 
 SOURCE: "G1"
 
-09.02 EFFECT_ON_WEAKER_CARDS
+### 09.02 EFFECT_ON_WEAKER_CARDS
 
 LIMITATION
 
@@ -506,9 +508,9 @@ SOURCE: "G1"
 
 ---
 
-10. GROUP_AND_FRIEND_CARDS
+## 10. GROUP_AND_FRIEND_CARDS
 
-10.01 EVALUATION_EXCLUSION
+### 10.01 EVALUATION_EXCLUSION
 
 FACT
 
@@ -524,7 +526,7 @@ Guide 1 states that:
 
 SOURCE: "G1"
 
-10.02 FRIEND_LIKE_CARDS
+### 10.02 FRIEND_LIKE_CARDS
 
 FACT
 
@@ -537,7 +539,7 @@ AI_RULE
 
 ---
 
-11. CARD_DATA_EXTRACTION_RULE
+## 11. CARD_DATA_EXTRACTION_RULE
 
 When extracting an individual support card into the AI knowledge base, preserve objective properties where available:
 
@@ -584,9 +586,9 @@ These are evaluation/meta statements unless the mechanical condition behind them
 
 ---
 
-12. SPEED_SUPPORT_CARDS
+## 12. SPEED_SUPPORT_CARDS
 
-12.01 CATEGORY_CONTEXT
+### 12.01 CATEGORY_CONTEXT
 
 EVALUATION
 
@@ -602,9 +604,9 @@ Individual ranking positions are not permanent facts because they depend on:
 
 SOURCE: "G1"
 
-12.02 CARD_PROPERTIES_FROM_GUIDE1
+### 12.02 CARD_PROPERTIES_FROM_GUIDE1
 
-TOKAI_TEIO
+#### TOKAI_TEIO
 
 SOURCE_DATA
 
@@ -615,7 +617,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-ALMOND_EYE
+#### ALMOND_EYE
 
 SOURCE_DATA
 
@@ -626,7 +628,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-ADMIRE_GROOVE
+#### ADMIRE_GROOVE
 
 SOURCE_DATA
 
@@ -637,7 +639,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-STILL_IN_LOVE
+#### STILL_IN_LOVE
 
 SOURCE_DATA
 
@@ -652,7 +654,7 @@ EVALUATION
 
 SOURCE: "G1"
 
-RHEIN_KRAFT
+#### RHEIN_KRAFT
 
 SOURCE_DATA
 
@@ -664,7 +666,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-DREAM_JOURNEY
+#### DREAM_JOURNEY
 
 SOURCE_DATA
 
@@ -675,7 +677,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-NARITA_BRIAN
+#### NARITA_BRIAN
 
 SOURCE_DATA
 
@@ -686,7 +688,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-SMART_FALCON
+#### SMART_FALCON
 
 SOURCE_DATA
 
@@ -697,7 +699,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-VIVLOS
+#### VIVLOS
 
 SOURCE_DATA
 
@@ -707,7 +709,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-SEEKING_THE_PEARL
+#### SEEKING_THE_PEARL
 
 SOURCE_DATA
 
@@ -716,7 +718,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-EL_CONDOR_PASA_SPEED
+#### EL_CONDOR_PASA_SPEED
 
 SOURCE_DATA
 
@@ -728,7 +730,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-JUNGLE_POCKET
+#### JUNGLE_POCKET
 
 SOURCE_DATA
 
@@ -740,7 +742,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-DURAMENTE_SPEED
+#### DURAMENTE_SPEED
 
 SOURCE_DATA
 
@@ -752,7 +754,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-SAKURA_BAKUSHIN_O_SPEED
+#### SAKURA_BAKUSHIN_O_SPEED
 
 SOURCE_DATA
 
@@ -763,7 +765,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-MARUZENSKY_SPEED
+#### MARUZENSKY_SPEED
 
 SOURCE_DATA
 
@@ -775,7 +777,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-MEJIRO_DOBER_SPEED
+#### MEJIRO_DOBER_SPEED
 
 SOURCE_DATA
 
@@ -785,7 +787,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-MEJIRO_PALMER_SPEED
+#### MEJIRO_PALMER_SPEED
 
 CONDITION
 
@@ -805,7 +807,7 @@ LIMITATION
 
 SOURCE: "G1"
 
-MARVELOUS_SUNDAY_SPEED
+#### MARVELOUS_SUNDAY_SPEED
 
 SOURCE_DATA
 
@@ -816,7 +818,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-EISHIN_FLASH_SPEED
+#### EISHIN_FLASH_SPEED
 
 SOURCE_DATA
 
@@ -828,7 +830,7 @@ SOURCE_DATA
 
 SOURCE: "G1"
 
-KITASAN_BLACK_SPEED
+#### KITASAN_BLACK_SPEED
 
 SOURCE_DATA
 
@@ -842,7 +844,7 @@ EVALUATION
 
 SOURCE: "G1"
 
-TAIKI_SHUTTLE_SPEED
+#### TAIKI_SHUTTLE_SPEED
 
 SOURCE_DATA
 
@@ -857,9 +859,9 @@ SOURCE: "G1"
 
 ---
 
-13. STAMINA_SUPPORT_CARDS
+## 13. STAMINA_SUPPORT_CARDS
 
-13.01 CATEGORY_CONTEXT
+### 13.01 CATEGORY_CONTEXT
 
 EVALUATION
 
@@ -872,7 +874,7 @@ General source relationship:
 
 SOURCE: "G1"
 
-13.02 SPECIAL_ASSUMPTIONS
+### 13.02 SPECIAL_ASSUMPTIONS
 
 Some Stamina-card evaluations include explicit assumptions.
 
@@ -889,44 +891,44 @@ These assumptions must not be converted into general card properties.
 
 SOURCE: "G1"
 
-13.03 CARD_PROPERTIES
+### 13.03 CARD_PROPERTIES
 
-FENOMENO
+#### FENOMENO
 
 - Stamina support card.
 - Long-distance Leader orientation.
 - Provides a long-distance random acceleration Gold skill for Leaders.
 - Provides a late/mid-leg Gold skill.
 
-INARI_ONE
+#### INARI_ONE
 
 - Stamina support card.
 - Long-distance Betweener orientation.
 - Provides long-distance Betweener acceleration Gold skill.
 - Provides a mid-leg Gold skill.
 
-GOLD_SHIP_STAMINA
+#### GOLD_SHIP_STAMINA
 
 - Stamina support card.
 - Long-distance Chaser orientation.
 - Provides "Imminent Shadow".
 - Provides a Gold recovery for Chasers.
 
-AIR_SHakur
+#### AIR_SHakur
 
 - Stamina support card.
 - Provides a strong overall stat line according to Guide 1.
 - Provides a universal recovery + Speed skill or a final-leg current-Speed skill.
 - The final-leg skill has a condition related to not being at the front of the pack.
 
-MEJIRO_RYAN_STAMINA
+#### MEJIRO_RYAN_STAMINA
 
 - Stamina support card.
 - Mid-distance Betweener specialization.
 - Provides a mid-distance Betweener mid-leg Gold skill from the first chain event.
 - Guide 1 notes strong low-LB performance.
 
-SOUNDS_OF_EARTH
+#### SOUNDS_OF_EARTH
 
 - Stamina support card.
 - Provides strong cross-training.
@@ -934,12 +936,12 @@ SOUNDS_OF_EARTH
 - Provides high Skill Point gain.
 - Provides a choice involving a Gold recovery skill or Gold Speed skill.
 
-CURREN_BOUQUETDOR
+#### CURREN_BOUQUETDOR
 
 - Stamina support card.
 - Leader specialization.
 - Provides a Gold recovery skill.
 
-DURAMENTE_STAMINA
+#### DURAMENTE_STAMINA
 
-- 
+> **NOTE — FILE ENDS HERE.** The entry above was cut off when the file was saved.

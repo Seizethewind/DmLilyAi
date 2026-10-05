@@ -1,17 +1,19 @@
-UMAMUSUME AI REFERENCE — G2
+# UMAMUSUME AI REFERENCE — G2
 
 «Source module: Guide 2 — Uma Musume Reference
 Purpose: General training, stat, race, support-card, skill, and run-evaluation reference.
 
-This module is an extension of "CommunityGuide_AI.md".
+This module is an extension of "CommunityGuide_AI_updated.md".
 
 SOURCE STATUS: Guide 2 contains a mixture of mechanical information, practical training advice, scenario-specific strategy, current/meta recommendations, and personal evaluation. Only mechanically supported information should be treated as FACT. Strategy recommendations remain scoped to the source and its stated scenario/context.»
 
+> **NOTE — INCOMPLETE FILE:** this module is cut off partway through section 24. Anything after that point in Guide 2 was never saved.
+
 ---
 
-01. SOURCE_SCOPE
+## 01. SOURCE_SCOPE
 
-01.01 GENERAL
+### 01.01 GENERAL
 
 FACT
 
@@ -30,9 +32,9 @@ SOURCE: "G2"
 
 ---
 
-02. COMMON_TERMS
+## 02. COMMON_TERMS
 
-02.01 STATS
+### 02.01 STATS
 
 Term| Meaning
 Speed| Speed
@@ -43,26 +45,26 @@ Wisdom / Intelligence / Wit| Wisdom
 Energy| Training HP/Energy
 Motivation| Mood
 
-02.02 SURFACE
+### 02.02 SURFACE
 
 - Turf
 - Dirt
 
-02.03 DISTANCE
+### 02.03 DISTANCE
 
 - Short: 1000m–1400m
 - Mile: 1500m–1800m
 - Mid: 1900m–2400m
 - Long: 2500m–3600m
 
-02.04 RUNNING_STYLES
+### 02.04 RUNNING_STYLES
 
 - Runner / Escape
 - Leader
 - Betweener
 - Chaser
 
-02.05 TRAINING_TERMS
+### 02.05 TRAINING_TERMS
 
 - Rainbow = Friendship training.
 - Bond = Support-card bond gauge.
@@ -76,9 +78,9 @@ SOURCE: "G2"
 
 ---
 
-03. BASIC_TRAINING_STRATEGY
+## 03. BASIC_TRAINING_STRATEGY
 
-03.01 EARLY_TRAINING
+### 03.01 EARLY_TRAINING
 
 SOURCE GUIDANCE
 
@@ -93,7 +95,7 @@ During the early phase:
 
 SOURCE: "G2"
 
-03.02 SUPPORT_BOND
+### 03.02 SUPPORT_BOND
 
 FACT
 
@@ -102,7 +104,7 @@ FACT
 
 SOURCE: "G2"
 
-03.03 EXPERIENCE_RULE
+### 03.03 EXPERIENCE_RULE
 
 The source notes that experienced players can alter the basic flow depending on:
 
@@ -117,9 +119,9 @@ These are decision variables rather than fixed rules.
 
 ---
 
-04. URA_TRAINING_STRATEGY
+## 04. URA_TRAINING_STRATEGY
 
-04.01 TRAINING_LEVELS
+### 04.01 TRAINING_LEVELS
 
 FACT
 
@@ -129,7 +131,7 @@ FACT
 
 SOURCE: "G2"
 
-04.02 BONDING_WITH_TRAINING_LEVELS
+### 04.02 BONDING_WITH_TRAINING_LEVELS
 
 During the Bonding phase:
 
@@ -139,14 +141,14 @@ During the Bonding phase:
 
 SOURCE: "G2"
 
-04.03 WISDOM_TRAINING
+### 04.03 WISDOM_TRAINING
 
 FACT
 
 - Wisdom training does not consume Energy in the same way as the other standard trainings.
 - Guide 2 therefore treats Wisdom training as an important low-energy option.
 
-04.04 GUTS_TRAINING
+### 04.04 GUTS_TRAINING
 
 SOURCE EVALUATION
 
@@ -157,15 +159,15 @@ STATUS: "STRATEGY", not universal rule.
 
 ---
 
-05. HINTS_AND_BOND
+## 05. HINTS_AND_BOND
 
-05.01 HINT_BOND
+### 05.01 HINT_BOND
 
 FACT
 
 - A support-card Hint provides +5 Bond according to Guide 2.
 
-05.02 HINT_VALUE
+### 05.02 HINT_VALUE
 
 A Hint can simultaneously:
 
@@ -187,9 +189,9 @@ SOURCE: "G2"
 
 ---
 
-06. MOTIVATION
+## 06. MOTIVATION
 
-06.01 MOTIVATION_EFFECT
+### 06.01 MOTIVATION_EFFECT
 
 FACT / SOURCE MODEL
 
@@ -202,7 +204,7 @@ IMPORTANT
 - Exact training results also depend on support-card bonuses and other modifiers.
 - Do not use "1.16" as a universal fixed multiplier for every situation.
 
-06.02 MOTIVATION_TRADEOFF
+### 06.02 MOTIVATION_TRADEOFF
 
 Raising Motivation may require spending a training turn on an outing/date.
 
@@ -212,7 +214,7 @@ Expected future training gain
 vs.
 Cost of the turn used to raise Motivation
 
-06.03 UPCOMING_MOTIVATION_EVENTS
+### 06.03 UPCOMING_MOTIVATION_EVENTS
 
 Guide 2 identifies several scheduled events that can raise Motivation.
 
@@ -224,9 +226,9 @@ SOURCE: "G2"
 
 ---
 
-07. RACING_VS_TRAINING
+## 07. RACING_VS_TRAINING
 
-07.01 BASE_RACE_REWARD
+### 07.01 BASE_RACE_REWARD
 
 Guide 2 states that a winning G1 provides:
 
@@ -240,7 +242,7 @@ At 35% Race Bonus, the guide describes this as approximately:
 
 SOURCE: "G2"
 
-07.02 GUIDE_2_RACE_VALUE_MODEL
+### 07.02 GUIDE_2_RACE_VALUE_MODEL
 
 Guide 2 treats Skill Points as approximately half a stat when comparing race value with training value.
 
@@ -255,7 +257,7 @@ STATUS: "EVALUATION_MODEL"
 
 These values should not be treated as raw game formulas.
 
-07.03 RACE_SELECTION
+### 07.03 RACE_SELECTION
 
 Guide 2's general rule:
 
@@ -268,9 +270,9 @@ SOURCE: "G2"
 
 ---
 
-08. RAINBOW_SELECTION
+## 08. RAINBOW_SELECTION
 
-08.01 DECK_CONTEXT
+### 08.01 DECK_CONTEXT
 
 Rainbow frequency depends strongly on deck composition.
 
@@ -279,7 +281,7 @@ Example from Guide 2:
 - A deck with many Speed cards produces Speed Rainbows frequently.
 - A Power Rainbow can therefore have greater marginal value when it appears.
 
-08.02 SINGLE_VS_MULTIPLE_RAINBOWS
+### 08.02 SINGLE_VS_MULTIPLE_RAINBOWS
 
 When multiple Rainbows are available, compare:
 
@@ -290,7 +292,7 @@ When multiple Rainbows are available, compare:
 - Energy cost.
 - Future training opportunities.
 
-08.03 RAINBOW_NOT_ALWAYS_BEST
+### 08.03 RAINBOW_NOT_ALWAYS_BEST
 
 A Rainbow can be ignored when:
 
@@ -303,9 +305,9 @@ SOURCE: "G2"
 
 ---
 
-09. TRAINING_FAILURE_RISK
+## 09. TRAINING_FAILURE_RISK
 
-09.01 GUIDE_2_RULE_OF_THUMB
+### 09.01 GUIDE_2_RULE_OF_THUMB
 
 Guide 2 gives the following heuristic:
 
@@ -330,7 +332,7 @@ STATUS: "HEURISTIC"
 
 This is not a game mechanic or guaranteed optimal decision.
 
-09.02 RISK_TOLERANCE
+### 09.02 RISK_TOLERANCE
 
 The source explicitly notes that players can choose to be more or less risk-tolerant.
 
@@ -340,9 +342,9 @@ For run evaluation, record failure risk separately from expected gain rather tha
 
 ---
 
-10. STAT_SYSTEM
+## 10. STAT_SYSTEM
 
-10.01 STAT_CAP
+### 10.01 STAT_CAP
 
 SOURCE SCOPE
 
@@ -360,7 +362,7 @@ IMPORTANT
 
 The source is version-dependent. Do not apply this blindly if the game version has changed the cap or over-cap rules.
 
-10.02 SPEED
+### 10.02 SPEED
 
 Speed:
 
@@ -390,9 +392,9 @@ SOURCE: "G2"
 
 ---
 
-11. STAMINA
+## 11. STAMINA
 
-11.01 FUNCTION
+### 11.01 FUNCTION
 
 Stamina determines how much HP a character can effectively use during the race.
 
@@ -403,7 +405,7 @@ Guide 2 states:
 - Lower speed requirements reduce Stamina requirements.
 - Leaders receive an 11% Stamina penalty in the source's model.
 
-11.02 INSUFFICIENT_STAMINA
+### 11.02 INSUFFICIENT_STAMINA
 
 If Stamina is insufficient:
 
@@ -416,9 +418,9 @@ SOURCE: "G2"
 
 ---
 
-12. POWER
+## 12. POWER
 
-12.01 ACCELERATION
+### 12.01 ACCELERATION
 
 Power affects acceleration toward top speed.
 
@@ -440,18 +442,18 @@ BaseAcceleration
 × PhaseModifier
 × SurfaceAptitude
 
-12.02 POWER_AND_UPHILLS
+### 12.02 POWER_AND_UPHILLS
 
 Power also affects uphill speed penalties.
 
-12.03 LANE_CHANGE
+### 12.03 LANE_CHANGE
 
 Guide 2 gives the lane-change-speed relationship:
 
 Lane Change Speed =
 0.02 × (0.3 + 0.001 × Power) m/s
 
-12.04 POWER_OVER_1200
+### 12.04 POWER_OVER_1200
 
 Guide 2 states that when Power is above 1200, excess Power can be stored and released during the spurt to increase acceleration.
 
@@ -463,21 +465,21 @@ Use this only when the applicable game version supports the described mechanic.
 
 ---
 
-13. GUTS
+## 13. GUTS
 
-13.01 HP_CONSUMPTION
+### 13.01 HP_CONSUMPTION
 
 Guts reduces HP consumption during the final leg.
 
 Guide 2 states that Guts is less valuable point-for-point than Stamina for this purpose.
 
-13.02 MINIMUM_SPEED
+### 13.02 MINIMUM_SPEED
 
 Guts also increases minimum speed.
 
 The source describes this as most relevant in niche situations such as a Leader without Runners ahead.
 
-13.03 LAST_SPURT_SPEED
+### 13.03 LAST_SPURT_SPEED
 
 Guide 2 gives:
 
@@ -488,9 +490,9 @@ Guts also affects speed during position competition.
 
 ---
 
-14. WISDOM
+## 14. WISDOM
 
-14.01 SKILL_ACTIVATION
+### 14.01 SKILL_ACTIVATION
 
 Guide 2 states that Wisdom affects skill activation chance.
 
@@ -504,7 +506,7 @@ Wisdom| Skill Proc
 600| 85%
 700| 87%
 
-14.02 KAKARI
+### 14.02 KAKARI
 
 Wisdom also affects the chance of entering Kakari.
 
@@ -528,7 +530,7 @@ When Kakari occurs:
 
 SOURCE: "G2"
 
-14.03 DOWNHILL
+### 14.03 DOWNHILL
 
 Wisdom affects the chance of receiving the downhill speed boost.
 
@@ -540,7 +542,7 @@ Therefore:
 
 100 Wisdom = 4% chance
 
-14.04 TARGET_SPEED_RANDOMNESS
+### 14.04 TARGET_SPEED_RANDOMNESS
 
 The race is divided into 24 sections.
 
@@ -559,7 +561,7 @@ SOURCE: "G2"
 
 ---
 
-15. STAMINA_VS_GUTS
+## 15. STAMINA_VS_GUTS
 
 Guide 2 identifies a distance-dependent Guts threshold.
 
@@ -583,7 +585,7 @@ Long 3600m| 440
 
 SOURCE: "G2"
 
-15.01 MARGINAL_VALUE
+### 15.01 MARGINAL_VALUE
 
 The source gives the following approximate relationships:
 
@@ -621,7 +623,7 @@ These are source-derived comparative values, not direct game-stat conversions.
 
 ---
 
-16. HP_CALCULATION
+## 16. HP_CALCULATION
 
 Guide 2 gives:
 
@@ -638,7 +640,7 @@ Leader| 0.89
 Betweener| 1.00
 Chaser| 0.995
 
-16.01 GUTS_HP_EFFECT
+### 16.01 GUTS_HP_EFFECT
 
 The source gives the Guts HP-consumption multiplier as:
 
@@ -647,7 +649,7 @@ HP Consumption Multiplier =
 
 Higher Guts therefore lowers HP consumption through this multiplier.
 
-16.02 BASE_HP_CONSUMPTION
+### 16.02 BASE_HP_CONSUMPTION
 
 Guide 2 gives:
 
@@ -660,9 +662,9 @@ SOURCE: "G2"
 
 ---
 
-17. SUPPORT_CARD_PASSIVES
+## 17. SUPPORT_CARD_PASSIVES
 
-17.01 SPECIALTY_RATE
+### 17.01 SPECIALTY_RATE
 
 Specialty Rate increases the probability that a support card appears on its preferred training.
 
@@ -688,7 +690,7 @@ The source's example then calculates the final appearance rate from the total we
 
 SOURCE: "G2"
 
-17.02 STAT_BONUS
+### 17.02 STAT_BONUS
 
 A "<Stat> Bonus":
 
@@ -697,13 +699,13 @@ A "<Stat> Bonus":
 
 A Power Bonus on a Speed support, for example, increases the Power obtained during Speed training.
 
-17.03 INITIAL_STAT_UP
+### 17.03 INITIAL_STAT_UP
 
 Initial "<Stat> Up" adds that amount to the corresponding stat during training.
 
 It can be particularly useful for cards that appear in small numbers in a deck.
 
-17.04 HINT_RATE
+### 17.04 HINT_RATE
 
 Hint Rate Up:
 
@@ -712,11 +714,11 @@ Hint Rate Up:
 - Hints can therefore accelerate Rainbow activation.
 - Hints also provide skill discounts.
 
-17.05 HINT_LEVEL
+### 17.05 HINT_LEVEL
 
 Hint Level Bonus increases the skill discount obtained from a Hint.
 
-17.06 WISDOM_TRAINING_RECOVERY
+### 17.06 WISDOM_TRAINING_RECOVERY
 
 Wisdom Training Recovery Up:
 
@@ -724,7 +726,7 @@ Wisdom Training Recovery Up:
 - Increases Energy restored by Rainbow Wisdom training.
 - Guide 2 states that an MLB value is commonly around 4–5 Energy.
 
-17.07 RACE_BONUS
+### 17.07 RACE_BONUS
 
 Race Bonus increases Stats and Skill Points obtained from races.
 
@@ -736,21 +738,21 @@ Guide 2 states that this includes:
 
 It also affects certain mandatory/stat rewards according to scenario.
 
-17.08 FAN_COUNT_BONUS
+### 17.08 FAN_COUNT_BONUS
 
 Fan Count Bonus increases Fans obtained from races.
 
 ---
 
-18. FRIEND_CARD_PASSIVES
+## 18. FRIEND_CARD_PASSIVES
 
-18.01 STACKING
+### 18.01 STACKING
 
 Multiple Friend cards cannot appear on the same training.
 
 Therefore their corresponding Friend-card training effects cannot stack on the same training.
 
-18.02 FAILURE_RATE_DOWN
+### 18.02 FAILURE_RATE_DOWN
 
 Failure Rate Down reduces the probability of a failed training.
 
@@ -759,7 +761,7 @@ Guide 2's example:
 35% Failure Rate Down
 9% fail chance → 6%
 
-18.03 ENERGY_DISCOUNT
+### 18.03 ENERGY_DISCOUNT
 
 Energy Discount reduces the Energy cost of the training the Friend card is on.
 
@@ -770,19 +772,19 @@ Level 5 Speed training = 25 Energy
 20% discount:
 25 × 0.8 = 20 Energy
 
-18.04 EVENT_RECOVERY
+### 18.04 EVENT_RECOVERY
 
 Event Recovery Amount Up increases Energy obtained from support-card events, particularly dates.
 
-18.05 EVENT_EFFECT
+### 18.05 EVENT_EFFECT
 
 Event Effect Up increases other event rewards such as Skill Points.
 
 ---
 
-19. AGEMASEN
+## 19. AGEMASEN
 
-19.01 DEFINITION
+### 19.01 DEFINITION
 
 Some support-card event chains have a chance to provide the Gold skill or its lower-rarity version.
 
@@ -790,7 +792,7 @@ When the Gold skill is not provided, Guide 2 calls this:
 
 "Agemasen"
 
-19.02 STAT_DEPENDENCY
+### 19.02 STAT_DEPENDENCY
 
 Guide 2 states that the probability depends on the relevant stat associated with the support card.
 
@@ -812,9 +814,9 @@ SOURCE: "G2"
 
 ---
 
-20. RACE_BONUS
+## 20. RACE_BONUS
 
-20.01 GENERAL
+### 20.01 GENERAL
 
 Race Bonus increases the Stats and Skill Points obtained from race completion.
 
@@ -824,7 +826,7 @@ It applies to:
 - Mandatory races.
 - Finals.
 
-20.02 MANT_CONTEXT
+### 20.02 MANT_CONTEXT
 
 Guide 2 states:
 
@@ -837,7 +839,7 @@ For MANT, the source identifies 50% Race Bonus as an important target because:
 - Every 12.5% provides another +1 from G2/G3 rewards.
 - 50% aligns the relevant breakpoints.
 
-20.03 HAMMER_INTERACTION
+### 20.03 HAMMER_INTERACTION
 
 Golden Hammers multiply Race Bonus for the affected races.
 
@@ -852,7 +854,7 @@ Example:
 
 The source describes this as approximately 102% effective Race Bonus under its displayed percentage representation.
 
-20.04 URA_AOHARU
+### 20.04 URA_AOHARU
 
 Guide 2 states:
 
@@ -864,7 +866,7 @@ STATUS: scenario-specific source recommendation.
 
 ---
 
-21. TRAINING_STAT_GAIN
+## 21. TRAINING_STAT_GAIN
 
 Guide 2 gives the following training-output structure:
 
@@ -875,7 +877,7 @@ Training Result =
 × Product of FriendshipBonus
 × (1 + 0.05 × NumberOfSupportCards)
 
-21.01 CONDITIONS
+### 21.01 CONDITIONS
 
 Friendship Bonus:
 
@@ -886,7 +888,7 @@ Stat Bonus:
 
 - Applies only when the training normally gives that stat.
 
-21.02 MOTIVATION_MULTIPLIER
+### 21.02 MOTIVATION_MULTIPLIER
 
 Guide 2 states:
 
@@ -897,9 +899,9 @@ SOURCE: "G2"
 
 ---
 
-22. SKILLS
+## 22. SKILLS
 
-22.01 STRATEGY_AND_DISTANCE_REQUIREMENTS
+### 22.01 STRATEGY_AND_DISTANCE_REQUIREMENTS
 
 Skills can have:
 
@@ -919,7 +921,7 @@ Before evaluating a skill:
 4. Check race-phase condition.
 5. Check remaining conditions.
 
-22.02 SKILL_CONDITIONS
+### 22.02 SKILL_CONDITIONS
 
 Guide 2 describes skill conditions using logical operators:
 
@@ -942,7 +944,7 @@ SOURCE: "G2"
 
 ---
 
-23. TRAINING_DECISION_MODEL
+## 23. TRAINING_DECISION_MODEL
 
 For AI run evaluation, Guide 2 supports comparing a training against alternatives using:
 
@@ -958,7 +960,7 @@ Immediate Stat Gain
 
 A training should not be judged solely by its displayed stat total.
 
-23.01 EARLY_GAME_PRIORITY
+### 23.01 EARLY_GAME_PRIORITY
 
 Early run:
 
@@ -967,7 +969,7 @@ Bond
 → Rainbow Access
 → Core Stat Development
 
-23.02 MID_GAME_PRIORITY
+### 23.02 MID_GAME_PRIORITY
 
 Middle run:
 
@@ -976,7 +978,7 @@ Strong Rainbow
 → Race Value
 → Energy/Motivation Management
 
-23.03 LATE_GAME_PRIORITY
+### 23.03 LATE_GAME_PRIORITY
 
 Late run:
 
@@ -991,7 +993,7 @@ This section is a structured interpretation of Guide 2's training discussion, no
 
 ---
 
-24. RACE_VS_TRAINING_AI_RULE
+## 24. RACE_VS_TRAINING_AI_RULE
 
 When deciding between a race and training, evaluate:
 
@@ -1017,4 +1019,6 @@ Guide 2 gives these approximate baseline thresholds:
 - Around 43 base Stats to beat a G2/G3.
 - Around 70 base Stats to beat a G1.
 
-These thresholds are source 
+These thresholds are source
+
+> **NOTE — FILE ENDS HERE.** The last sentence was cut off when the file was saved.
