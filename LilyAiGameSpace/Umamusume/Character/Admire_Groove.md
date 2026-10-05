@@ -1,3 +1,193 @@
+# Admire Groove (Original) | Uma Musume | GameTora
+[< Back to character list](https://gametora.com/umamusume/characters)
+
+_Note: This character is not yet released on the Global server. Showing JP server data._
+
+Glacial Queen
+
+Admire Groove
+-------------
+
+⭐⭐⭐
+
+Japanese name
+
+アドマイヤグルーヴ
+
+Release date
+
+???
+
+![Admire Groove (Original)](https://gametora.com/images/umamusume/characters/chara_stand_1118_111801.png)
+
+Japanese name
+
+アドマイヤグルーヴ
+
+Voice actor
+
+Release date
+
+???
+
+Birthday
+
+???
+
+Height
+
+cm
+
+Three sizes
+
+???
+
+Obtained from
+-------------
+
+Standard Gacha
+
+Gallery
+-------
+
+Base stats
+----------
+
+Stat bonuses
+------------
+
+![Speed](https://gametora.com/images/umamusume/icons/utx_ico_obtain_00.png)
+
+10%
+
+![Stamina](https://gametora.com/images/umamusume/icons/utx_ico_obtain_01.png)
+
+\-
+
+![Power](https://gametora.com/images/umamusume/icons/utx_ico_obtain_02.png)
+
+\-
+
+![Guts](https://gametora.com/images/umamusume/icons/utx_ico_obtain_03.png)
+
+10%
+
+![Wit](https://gametora.com/images/umamusume/icons/utx_ico_obtain_04.png)
+
+10%
+
+Aptitude
+--------
+
+Objectives
+----------
+
+### Junior
+
+#### 1\. Participate in the Junior Make Debut
+
+Turn 12
+
+Turf – 1800m – Mile
+
+![](https://gametora.com/images/umamusume/icons/fan.png)
+
+#### 2\. Have at least 3000 fans
+
+Turn 23 (previous + 10)
+
+Junior Class
+
+,
+
+Early December
+
+### Classic
+
+#### 3\. Place 5th or better in the Oka Sho
+
+Turn 31 (previous + 7)
+
+Classic Class
+
+,
+
+Early April
+
+G1 – Turf – 1600m – Mile
+
+#### 4\. Place 5th or better in the Japanese Oaks
+
+Turn 34 (previous + 2)
+
+G1 – Turf – 2400m – Medium
+
+#### 5\. Place 3rd or better in the Shuka Sho
+
+Turn 44 (previous + 9)
+
+Classic Class
+
+,
+
+Late October
+
+G1 – Turf – 2000m – Medium
+
+#### 6\. Place 1st in the Queen Elizabeth II Cup
+
+Turn 45
+
+Classic Class
+
+,
+
+Early November
+
+G1 – Turf – 2200m – Medium
+
+### Senior
+
+#### 7\. Place 3rd or better in the Osaka Hai
+
+Turn 54 (previous + 8)
+
+G1 – Turf – 2000m – Medium
+
+#### 8\. Place 3rd or better in the Takarazuka Kinen
+
+Turn 60 (previous + 5)
+
+G1 – Turf – 2200m – Medium
+
+#### 9\. Place 3rd or better in the Tenno Sho (Autumn)
+
+Turn 68 (previous + 7)
+
+Senior Class
+
+,
+
+Late October
+
+G1 – Turf – 2000m – Medium
+
+#### 10\. Place 1st in the Queen Elizabeth II Cup
+
+Turn 69
+
+Senior Class
+
+,
+
+Early November
+
+G1 – Turf – 2200m – Medium
+
+**Newest Scenario**
+
+**Newest Update**
+
 # Admire Groove
 
 **Japanese name:** アドマイヤグルーヴ (Adomaiya Gurūvu)
