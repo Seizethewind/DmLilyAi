@@ -1,11 +1,11 @@
-UMAMUSUME AI REFERENCE — G3
+# UMAMUSUME AI REFERENCE — G3
 
 «Source module: Guide 3 — Uma Musume Race Mechanics
 Source author: KuromiAK
 
 Purpose: Race simulation mechanics, stat processing, movement, acceleration, stamina/HP, skills, lane behavior, positioning, and race-state mechanics.
 
-This module is an extension of "CommunityGuide_AI.md".
+This module is an extension of "CommunityGuide_AI_updated.md".
 
 IMPORTANT SOURCE STATUS
 
@@ -24,9 +24,9 @@ SOURCE ID: "G3"»
 
 ---
 
-01. RACE_SIMULATION_STRUCTURE
+## 01. RACE_SIMULATION_STRUCTURE
 
-01.01 FRAME_RATE
+### 01.01 FRAME_RATE
 
 CONFIRMED
 
@@ -35,7 +35,7 @@ CONFIRMED
 
 SOURCE: "G3"
 
-01.02 RACE_REPLAY_RECORDING
+### 01.02 RACE_REPLAY_RECORDING
 
 The game records Uma position:
 
@@ -49,7 +49,7 @@ SOURCE: "G3"
 
 ---
 
-02. RACE_SECTIONS
+## 02. RACE_SECTIONS
 
 CONFIRMED
 
@@ -69,7 +69,7 @@ SOURCE: "G3"
 
 ---
 
-03. RACE_PHASES
+## 03. RACE_PHASES
 
 A race has four phases.
 
@@ -89,15 +89,15 @@ SOURCE: "G3"
 
 ---
 
-04. DISTANCE_UNIT
+## 04. DISTANCE_UNIT
 
-04.01 BASHIN
+### 04.01 BASHIN
 
 "Bashin" is a unit of race distance based on horse length.
 
 It is used by movement and positioning mechanics.
 
-04.02 HORSE_LANE
+### 04.02 HORSE_LANE
 
 The source uses:
 
@@ -107,9 +107,9 @@ SOURCE: "G3"
 
 ---
 
-05. COURSE_WIDTH
+## 05. COURSE_WIDTH
 
-05.01 COURSE_WIDTH
+### 05.01 COURSE_WIDTH
 
 The source defines:
 
@@ -117,7 +117,7 @@ The source defines:
 
 Lane distance is measured from the inner fence using course-width units.
 
-05.02 COURSE_WIDTH_RANGE
+### 05.02 COURSE_WIDTH_RANGE
 
 The maximum lane distance differs by race course.
 
@@ -132,13 +132,13 @@ SOURCE: "G3"
 
 ---
 
-06. STAT_PROCESSING
+## 06. STAT_PROCESSING
 
-06.01 RAW_STATS
+### 06.01 RAW_STATS
 
 Raw Stats are the values displayed in the stat panel.
 
-06.02 RAW_STAT_OVER_1200
+### 06.02 RAW_STAT_OVER_1200
 
 The source states that:
 
@@ -159,7 +159,7 @@ The source separately states that stat caps were raised to "2500" at the 5th Ann
 
 SOURCE: "G3"
 
-06.03 BASE_STATS
+### 06.03 BASE_STATS
 
 Base Stats are Raw Stats after Motivation modification.
 
@@ -171,7 +171,7 @@ SOURCE: "G3"
 
 ---
 
-07. MOTIVATION_COEFFICIENT
+## 07. MOTIVATION_COEFFICIENT
 
 The source provides the following Motivation coefficients:
 
@@ -186,7 +186,7 @@ SOURCE: "G3"
 
 ---
 
-08. ADJUSTED_STATS
+## 08. ADJUSTED_STATS
 
 Adjusted Stats are generated after applying race-specific modifiers.
 
@@ -219,7 +219,7 @@ SOURCE: "G3"
 
 ---
 
-09. SPEED_SYSTEM
+## 09. SPEED_SYSTEM
 
 Speed is not a single number during a race.
 
@@ -246,7 +246,7 @@ These values interact with:
 
 ---
 
-10. BASE_SPEED
+## 10. BASE_SPEED
 
 CONFIRMED
 
@@ -258,7 +258,7 @@ SOURCE: "G3"
 
 ---
 
-11. TARGET_SPEED
+## 11. TARGET_SPEED
 
 Target Speed is the speed the Uma attempts to reach under the current race state.
 
@@ -285,7 +285,7 @@ during the relevant race phase?
 
 ---
 
-12. CURRENT_SPEED
+## 12. CURRENT_SPEED
 
 Current Speed is the Uma's current movement speed.
 
@@ -295,7 +295,7 @@ Current Speed moves toward Target Speed over time through acceleration/decelerat
 
 ---
 
-13. ACTUAL_SPEED
+## 13. ACTUAL_SPEED
 
 Actual Speed includes effects from skills and movement.
 
@@ -303,7 +303,7 @@ The source notes that actual speed differs from the simplified lane-change repre
 
 ---
 
-14. SPEED_RANDOMNESS
+## 14. SPEED_RANDOMNESS
 
 The race is divided into 24 sections.
 
@@ -317,7 +317,7 @@ SOURCE: "G3"
 
 ---
 
-15. LAST_SPURT
+## 15. LAST_SPURT
 
 Last Spurt is a race-state mechanic that increases the target speed during the final portion of a race.
 
@@ -336,7 +336,7 @@ The source's race-phase "Last Spurt" label refers to Sections 21–24. This shou
 
 ---
 
-16. STARTING_SPEED
+## 16. STARTING_SPEED
 
 Starting Speed is handled separately from ordinary race speed.
 
@@ -353,7 +353,7 @@ SOURCE: "G3"
 
 ---
 
-17. MINIMUM_SPEED
+## 17. MINIMUM_SPEED
 
 Minimum Speed is especially important when an Uma is out of HP.
 
@@ -371,7 +371,7 @@ SOURCE: "G3"
 
 ---
 
-18. ACCELERATION
+## 18. ACCELERATION
 
 Acceleration changes Current Speed toward Target Speed.
 
@@ -387,7 +387,7 @@ Acceleration is therefore not determined by Power alone.
 
 ---
 
-19. START_DASH
+## 19. START_DASH
 
 Start Dash is a special acceleration phase occurring at race start.
 
@@ -397,15 +397,15 @@ The source places Start Dash within the race initialization/movement system.
 
 ---
 
-20. SLOPE
+## 20. SLOPE
 
-20.01 UPHILL
+### 20.01 UPHILL
 
 When running uphill:
 
 - Target Speed is reduced by a slope modifier.
 
-20.02 DOWNHILL
+### 20.02 DOWNHILL
 
 When running downhill:
 
@@ -418,7 +418,7 @@ SOURCE: "G3"
 
 ---
 
-21. STAMINA_TO_HP
+## 21. STAMINA_TO_HP
 
 CONFIRMED
 
@@ -442,7 +442,7 @@ SOURCE: "G3"
 
 ---
 
-22. HP_RECOVERY
+## 22. HP_RECOVERY
 
 HP recovery skills restore a percentage of maximum HP.
 
@@ -455,7 +455,7 @@ SOURCE: "G3"
 
 ---
 
-23. OUT_OF_HP
+## 23. OUT_OF_HP
 
 When an Uma runs out of HP:
 
@@ -479,9 +479,9 @@ SOURCE: "G3"
 
 ---
 
-24. SKILL_ACTIVATION
+## 24. SKILL_ACTIVATION
 
-24.01 PRE_RACE_CHECK
+### 24.01 PRE_RACE_CHECK
 
 Many skills require a Wisdom check before the race.
 
@@ -497,7 +497,7 @@ At initialization:
 
 SOURCE: "G3"
 
-24.02 AI_RULE
+### 24.02 AI_RULE
 
 A skill can therefore fail to activate because of its activation check before race-state conditions are even considered.
 
@@ -511,7 +511,7 @@ Condition reached but skill unavailable
 
 ---
 
-25. SKILL_DURATION
+## 25. SKILL_DURATION
 
 Many skills have a base duration.
 
@@ -527,7 +527,7 @@ SOURCE: "G3"
 
 ---
 
-26. SKILL_COOLDOWN
+## 26. SKILL_COOLDOWN
 
 Skills can have cooldown behavior that prevents immediate repeated activation.
 
@@ -539,7 +539,7 @@ Cooldown must be considered separately from:
 
 ---
 
-27. SKILL_CONDITIONS
+## 27. SKILL_CONDITIONS
 
 Skill conditions can depend on race state.
 
@@ -564,7 +564,7 @@ A skill's practical reliability depends on the probability that its condition oc
 
 ---
 
-28. SKILL_TARGET
+## 28. SKILL_TARGET
 
 Skill targets determine which Uma receives the effect.
 
@@ -588,7 +588,7 @@ Duration
 
 ---
 
-29. SKILL_LEVEL
+## 29. SKILL_LEVEL
 
 Skill level affects skill strength.
 
@@ -609,7 +609,7 @@ The exact effect is source-specific and should remain version-scoped.
 
 ---
 
-30. SKILL_VALUE_SCALING
+## 30. SKILL_VALUE_SCALING
 
 The source documents several internal value-scaling types.
 
@@ -634,7 +634,7 @@ A skill's displayed effect may not represent its final race effect if the skill 
 
 ---
 
-31. SKILL_DURATION_SCALING
+## 31. SKILL_DURATION_SCALING
 
 Duration can scale using:
 
@@ -656,7 +656,7 @@ SOURCE: "G3"
 
 ---
 
-32. ADDITIONAL_ACTIVATION
+## 32. ADDITIONAL_ACTIVATION
 
 Some skills contain an additional activation/effect.
 
@@ -669,9 +669,9 @@ The source describes this as:
 
 ---
 
-33. LANE_SYSTEM
+## 33. LANE_SYSTEM
 
-33.01 LANE_DISTANCE
+### 33.01 LANE_DISTANCE
 
 Lane position is measured from the inner fence.
 
@@ -680,7 +680,7 @@ Units:
 1 course width = 11.25m
 1 horse lane = 1/18 course width
 
-33.02 LANE_LIMIT
+### 33.02 LANE_LIMIT
 
 Minimum lane distance:
 
@@ -688,7 +688,7 @@ Minimum lane distance:
 
 Maximum lane distance depends on the race course.
 
-33.03 INITIAL_LANE
+### 33.03 INITIAL_LANE
 
 Initial lane is determined by:
 
@@ -708,7 +708,7 @@ SOURCE: "G3"
 
 ---
 
-34. LANE_CHANGE_SPEED
+## 34. LANE_CHANGE_SPEED
 
 Lane-change movement contains multiple components:
 
@@ -726,7 +726,7 @@ Actual speed accounts for skill effects and differs depending on movement direct
 
 ---
 
-35. TARGET_LANE
+## 35. TARGET_LANE
 
 Target Lane is the lane an Uma is attempting to reach.
 
@@ -743,7 +743,7 @@ The source identifies three movement strategies:
 
 ---
 
-36. OVERTAKE_TARGET
+## 36. OVERTAKE_TARGET
 
 To become an overtake target, an Uma generally must:
 
@@ -758,7 +758,7 @@ SOURCE: "G3"
 
 ---
 
-37. NORMAL_LANE_MODE
+## 37. NORMAL_LANE_MODE
 
 Normal mode is used when:
 
@@ -778,7 +778,7 @@ SOURCE: "G3"
 
 ---
 
-38. OVERTAKE_MODE
+## 38. OVERTAKE_MODE
 
 When overtake targets exist:
 
@@ -789,7 +789,7 @@ Overtake candidates are derived from the crowd surrounding the overtake target.
 
 ---
 
-39. BLOCKING
+## 39. BLOCKING
 
 Blocking can prevent an Uma from moving toward her desired lane.
 
@@ -812,7 +812,7 @@ rather than insufficient Stats.
 
 ---
 
-40. POSITIONING_MODES
+## 40. POSITIONING_MODES
 
 The race uses multiple position-management states.
 
@@ -830,7 +830,7 @@ These modes modify how the Uma chooses target speed and/or lane.
 
 ---
 
-41. PACEMAKER
+## 41. PACEMAKER
 
 Pacemaker behavior is associated with front-running/position maintenance.
 
@@ -843,13 +843,13 @@ It interacts with:
 
 ---
 
-42. PACE_UP
+## 42. PACE_UP
 
 Pace Up behavior changes target speed when the Uma needs to improve position.
 
 ---
 
-43. PACE_DOWN
+## 43. PACE_DOWN
 
 Pace Down behavior reduces movement requirements in certain positioning states.
 
@@ -857,7 +857,7 @@ The source explicitly connects Pace Down to lane selection in Normal Mode.
 
 ---
 
-44. RUSHED / KAKARI
+## 44. RUSHED / KAKARI
 
 "Kakari" is a race-state condition affecting behavior and HP consumption.
 
@@ -875,7 +875,7 @@ If an Uma unexpectedly loses HP early:
 
 ---
 
-45. SPOT_STRUGGLE
+## 45. SPOT_STRUGGLE
 
 Spot Struggle / Lead Competition is a race-state mechanic related to competing for position.
 
@@ -888,7 +888,7 @@ It can influence:
 
 ---
 
-46. DUELING
+## 46. DUELING
 
 Dueling / Compete Fight is a race-state mechanic involving Umas competing directly.
 
@@ -896,7 +896,7 @@ It should be treated separately from ordinary target-speed movement.
 
 ---
 
-47. CHARGE_UP
+## 47. CHARGE_UP
 
 Charge Up / Fully Charged and Conserve Power / Release are race-state mechanics related to conserving or releasing race performance.
 
@@ -904,7 +904,7 @@ These mechanics can affect late-race performance and should be evaluated separat
 
 ---
 
-48. COMPETE_BEFORE_SPURT
+## 48. COMPETE_BEFORE_SPURT
 
 "Compete Before Spurt" is a pre-spurt positioning mechanic.
 
@@ -912,7 +912,7 @@ It affects race-state behavior before the main spurt phase.
 
 ---
 
-49. STAMINA_KEEP
+## 49. STAMINA_KEEP
 
 "Stamina Keep" is a race-state behavior related to conserving stamina.
 
@@ -924,7 +924,7 @@ remaining HP
 
 ---
 
-50. SECURE_LEAD
+## 50. SECURE_LEAD
 
 "Secure Lead" is a race-state mechanic associated with maintaining a lead.
 
@@ -932,7 +932,7 @@ It should be treated separately from ordinary target-speed calculations.
 
 ---
 
-51. STAMINA_LIMIT_BREAK
+## 51. STAMINA_LIMIT_BREAK
 
 INFERRED
 
@@ -952,7 +952,7 @@ SOURCE: "G3"
 
 ---
 
-52. ZENKAI_SPURT
+## 52. ZENKAI_SPURT
 
 "Zenkai Spurt" is a race-state mechanic associated with full spurt behavior.
 
@@ -965,7 +965,7 @@ It should be evaluated separately from:
 
 ---
 
-53. WIZ_LIMIT_BREAK_BUFF
+## 53. WIZ_LIMIT_BREAK_BUFF
 
 Guide 3 identifies a Wisdom-related Limit Break Buff as a separate race mechanic.
 
@@ -977,7 +977,7 @@ Do not collapse this mechanic into ordinary Skill Activation Chance.
 
 ---
 
-54. RACE_FINISH_TIME
+## 54. RACE_FINISH_TIME
 
 Finish time is determined by the accumulated result of:
 
@@ -997,7 +997,7 @@ A lower visible stat total can still produce a faster race if race-state interac
 
 ---
 
-55. RACE_COURSE
+## 55. RACE_COURSE
 
 Race courses define:
 
@@ -1015,7 +1015,7 @@ Therefore a skill or stat cannot always be evaluated independently of the race c
 
 ---
 
-56. COURSE_EVENTS
+## 56. COURSE_EVENTS
 
 Course events can include:
 
@@ -1036,7 +1036,7 @@ Course events influence:
 
 ---
 
-57. INITIALIZATION_ORDER
+## 57. INITIALIZATION_ORDER
 
 At race initialization, the source gives the following order:
 
@@ -1052,7 +1052,7 @@ SOURCE: "G3"
 
 ---
 
-58. RACE_EVALUATION_MODEL
+## 58. RACE_EVALUATION_MODEL
 
 For AI evaluation of a completed run, use the following causal chain:
 
@@ -1092,7 +1092,7 @@ This structure should be preferred over evaluating the result from final Stats a
 
 ---
 
-59. AI_DIAGNOSTIC_ORDER
+## 59. AI_DIAGNOSTIC_ORDER
 
 When a player asks:
 
@@ -1183,7 +1183,7 @@ Randomness
 
 ---
 
-60. BUILD_EVALUATION
+## 60. BUILD_EVALUATION
 
 When evaluating a build for a target race, compare:
 
@@ -1233,7 +1233,7 @@ Are the skills:
 
 ---
 
-61. SKILL_EVALUATION_FRAMEWORK
+## 61. SKILL_EVALUATION_FRAMEWORK
 
 Never evaluate a skill only by its displayed numerical effect.
 
@@ -1249,23 +1249,23 @@ Effect Magnitude
 
 This is an AI evaluation framework derived from the mechanics described by Guide 3; it is not presented as an official game formula.
 
-61.01 EFFECT_MAGNITUDE
+### 61.01 EFFECT_MAGNITUDE
 
 How large is the speed/acceleration/recovery/etc. effect?
 
-61.02 EFFECTIVE_DURATION
+### 61.02 EFFECTIVE_DURATION
 
 How long does the effect actually last on the target race distance?
 
-61.03 ACTIVATION_PROBABILITY
+### 61.03 ACTIVATION_PROBABILITY
 
 Can the Uma pass the pre-race Skill Activation check?
 
-61.04 CONDITION_PROBABILITY
+### 61.04 CONDITION_PROBABILITY
 
 How often will the race state satisfy the skill's condition?
 
-61.05 TARGET_RELEVANCE
+### 61.05 TARGET_RELEVANCE
 
 Does the skill affect:
 
@@ -1274,13 +1274,13 @@ Does the skill affect:
 - A specific strategy?
 - A specific distance?
 
-61.06 RACE_STATE_RELEVANCE
+### 61.06 RACE_STATE_RELEVANCE
 
 Does it activate during a strategically valuable period?
 
 ---
 
-62. SOURCE_CONFIDENCE_RULES
+## 62. SOURCE_CONFIDENCE_RULES
 
 CONFIRMED
 
@@ -1314,7 +1314,7 @@ The source explicitly warns that mechanics and bugs can differ between servers.
 
 ---
 
-63. VERSION_SCOPE
+## 63. VERSION_SCOPE
 
 Guide 3 contains mechanics spanning different game versions.
 
@@ -1336,7 +1336,7 @@ When a mechanic appears to conflict with another source:
 
 ---
 
-64. MASTER_REFERENCE_USAGE
+## 64. MASTER_REFERENCE_USAGE
 
 This module should be used primarily when the AI needs to answer:
 
@@ -1355,7 +1355,7 @@ This module should be used primarily when the AI needs to answer:
 
 ---
 
-65. SOURCE_TRACEABILITY
+## 65. SOURCE_TRACEABILITY
 
 SOURCE_ID
 
@@ -1395,4 +1395,4 @@ MASTER_REFERENCE
 
 This file is an extension of:
 
-"CommunityGuide_AI.md"
+"CommunityGuide_AI_updated.md"

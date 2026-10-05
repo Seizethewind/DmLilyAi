@@ -1,4 +1,4 @@
-UMAMUSUME AI REFERENCE — G4
+# UMAMUSUME AI REFERENCE — G4
 
 «Source module: pecan's Champions Meeting Guides
 
@@ -6,7 +6,7 @@ Authors listed in source: pecan, Steven, hanue
 
 Purpose: Track-specific race knowledge, Champions Meeting / League of Heroes observations, skill timing, stat thresholds, strategy constraints, and build tradeoffs.
 
-This module is an extension of "CommunityGuide_AI.md".
+This module is an extension of "CommunityGuide_AI_updated.md".
 
 IMPORTANT
 
@@ -25,11 +25,13 @@ Therefore:
 
 SOURCE ID: "G4"»
 
+> **NOTE — INCOMPLETE FILE:** this module is cut off in the middle of the Longchamp 2400m profile (section 32.07). Any track profiles after it were never saved.
+
 ---
 
-01. DATA_CLASSIFICATION
+## 01. DATA_CLASSIFICATION
 
-01.01 REUSABLE_TRACK_DATA
+### 01.01 REUSABLE_TRACK_DATA
 
 The following information is useful as structured race data:
 
@@ -50,7 +52,7 @@ The following information is useful as structured race data:
 - Skill activation timing.
 - Historical stat thresholds.
 
-01.02 HISTORICAL_META
+### 01.02 HISTORICAL_META
 
 Do not treat the following as permanent facts:
 
@@ -67,7 +69,7 @@ These are event/version dependent.
 
 ---
 
-02. TRACK_ANALYSIS_MODEL
+## 02. TRACK_ANALYSIS_MODEL
 
 For AI race evaluation, represent a track using:
 
@@ -91,7 +93,7 @@ TRACK
 
 ---
 
-03. SKILL_EFFECTIVENESS_MODEL
+## 03. SKILL_EFFECTIVENESS_MODEL
 
 Guide 4 repeatedly evaluates skills by where and when they activate.
 
@@ -116,7 +118,7 @@ A skill with a high numerical modifier can still have poor practical value if:
 
 ---
 
-04. ACCELERATION_SKILLS
+## 04. ACCELERATION_SKILLS
 
 Acceleration skills are strongly dependent on:
 
@@ -127,15 +129,15 @@ Acceleration skills are strongly dependent on:
 - Current race position.
 - Track length.
 
-04.01 IMMEDIATE_ACCEL
+### 04.01 IMMEDIATE_ACCEL
 
 Immediate acceleration is generally most valuable when it overlaps the beginning of the spurt.
 
-04.02 LATE_ACCEL
+### 04.02 LATE_ACCEL
 
 An acceleration skill that activates after a large portion of the spurt has already occurred loses practical value.
 
-04.03 RANDOM_ACCEL
+### 04.03 RANDOM_ACCEL
 
 Guide 4 repeatedly distinguishes reliable acceleration from random acceleration.
 
@@ -153,7 +155,7 @@ Random acceleration becomes less attractive when:
 
 ---
 
-05. FINAL_CORNER_SKILLS
+## 05. FINAL_CORNER_SKILLS
 
 Final-corner skills depend heavily on the location of:
 
@@ -161,18 +163,18 @@ Spurt start
 vs.
 Final corner
 
-05.01 SPURT_DURING_FINAL_CORNER
+### 05.01 SPURT_DURING_FINAL_CORNER
 
 Final-corner acceleration can be highly valuable when the spurt begins during the final corner.
 
-05.02 SPURT_AFTER_FINAL_CORNER
+### 05.02 SPURT_AFTER_FINAL_CORNER
 
 If the spurt begins after the final corner:
 
 - Final-corner acceleration may lose value.
 - Final-corner speed skills can still retain value depending on timing.
 
-05.03 FINAL_CORNER_TOO_EARLY
+### 05.03 FINAL_CORNER_TOO_EARLY
 
 If the final corner occurs substantially before spurt:
 
@@ -187,7 +189,7 @@ Evaluate its activation point against the track's spurt start.
 
 ---
 
-06. FINAL_STRAIGHT
+## 06. FINAL_STRAIGHT
 
 Final-straight length changes strategy balance.
 
@@ -213,7 +215,7 @@ Guide 4 repeatedly uses final-straight length as an explanation for strategy dif
 
 ---
 
-07. HILLS
+## 07. HILLS
 
 Hills affect:
 
@@ -223,11 +225,11 @@ Hills affect:
 - Stamina consumption.
 - Skill timing.
 
-07.01 UPHILL
+### 07.01 UPHILL
 
 A long uphill section increases the practical value of Power.
 
-07.02 DOWNHILL
+### 07.02 DOWNHILL
 
 Downhill sections can:
 
@@ -236,7 +238,7 @@ Downhill sections can:
 - Affect stamina consumption.
 - Change the value of downhill-specific skills.
 
-07.03 SPURT_ON_HILL
+### 07.03 SPURT_ON_HILL
 
 When spurt begins on or near a hill:
 
@@ -245,7 +247,7 @@ When spurt begins on or near a hill:
 
 ---
 
-08. STAT_THRESHOLDS
+## 08. STAT_THRESHOLDS
 
 Guide 4 uses "stat thresholds" to identify tracks where reaching a specific stat breakpoint produces additional race value.
 
@@ -256,7 +258,7 @@ Common threshold categories:
 - Guts.
 - Power.
 
-08.01 THRESHOLD_EVALUATION
+### 08.01 THRESHOLD_EVALUATION
 
 For a target race:
 
@@ -274,7 +276,7 @@ Do not automatically maximize a stat if:
 
 ---
 
-09. STAMINA_THRESHOLD
+## 09. STAMINA_THRESHOLD
 
 Stamina thresholds can affect:
 
@@ -298,7 +300,7 @@ STATUS: historical event-specific data.
 
 ---
 
-10. GUTS_THRESHOLD
+## 10. GUTS_THRESHOLD
 
 Guts thresholds are relevant to:
 
@@ -316,7 +318,7 @@ STATUS: track/version dependent.
 
 ---
 
-11. POWER_VALUE
+## 11. POWER_VALUE
 
 Guide 4 repeatedly identifies Power as valuable when a track contains:
 
@@ -331,7 +333,7 @@ For Niigata 1000m, Guide 4 identifies the opening hill and short race distance a
 
 ---
 
-12. START_DELAY
+## 12. START_DELAY
 
 Short tracks make start delay more important because:
 
@@ -353,7 +355,7 @@ When evaluating a very short race:
 
 ---
 
-13. NO_CORNER_TRACKS
+## 13. NO_CORNER_TRACKS
 
 Niigata 1000m is identified as a track with no corners.
 
@@ -374,7 +376,7 @@ Does the track actually contain the required corner?
 
 ---
 
-14. CORNER_COUNT
+## 14. CORNER_COUNT
 
 Corner numbering matters.
 
@@ -388,7 +390,7 @@ Do not interpret "corner 3" as simply the third physical corner without checking
 
 ---
 
-15. POSITION_CONDITIONS
+## 15. POSITION_CONDITIONS
 
 Many acceleration skills require a specific race position.
 
@@ -408,7 +410,7 @@ Skill value depends on whether the intended strategy can realistically occupy th
 
 ---
 
-16. BACKLINE_BLOCKING
+## 16. BACKLINE_BLOCKING
 
 Backline strategies can be affected by blocking.
 
@@ -441,7 +443,7 @@ not a fixed property of the strategy.
 
 ---
 
-17. FRONTLINE_POSITIONING
+## 17. FRONTLINE_POSITIONING
 
 For Runners and Leaders, early position can determine whether position-dependent skills activate.
 
@@ -456,7 +458,7 @@ especially when the build requires a specific position for an inherited unique.
 
 ---
 
-18. NON_RUNNER_POSITIONING
+## 18. NON_RUNNER_POSITIONING
 
 Guide 4 repeatedly identifies "Uma Like" ("ウマ好み") as valuable for non-Runners because it can help them establish a useful early position.
 
@@ -470,7 +472,7 @@ This is a historical strategy observation, not a universal requirement.
 
 ---
 
-19. INHERITED_ACCELERATION
+## 19. INHERITED_ACCELERATION
 
 Inherited acceleration should be selected according to:
 
@@ -503,7 +505,7 @@ The source evaluates these skills differently on different tracks.
 
 ---
 
-20. INHERIT_SELECTION
+## 20. INHERIT_SELECTION
 
 Guide 4 demonstrates that inherited skill choice can be modeled as a conditional decision:
 
@@ -520,7 +522,7 @@ Popularity requirements, blocking requirements, and strategy requirements can si
 
 ---
 
-21. POPULARITY_CONDITIONS
+## 21. POPULARITY_CONDITIONS
 
 Some skills depend on popularity.
 
@@ -546,7 +548,7 @@ Skill value if failed
 
 ---
 
-22. SKILL_BUDGET
+## 22. SKILL_BUDGET
 
 Guide 4 explicitly warns against buying every available acceleration skill.
 
@@ -569,7 +571,7 @@ STATUS: historical strategy heuristic, not universal rule.
 
 ---
 
-23. SPEED_VS_ACCELERATION
+## 23. SPEED_VS_ACCELERATION
 
 Guide 4 demonstrates an important build principle:
 
@@ -590,7 +592,7 @@ must be evaluated together.
 
 ---
 
-24. RECOVERY_SKILLS
+## 24. RECOVERY_SKILLS
 
 Recovery requirements depend on:
 
@@ -613,7 +615,7 @@ These are historical event-specific values.
 
 ---
 
-25. OONIGE_COMPETITION
+## 25. OONIGE_COMPETITION
 
 Guide 4 identifies Oonige/Runner competition as a special stamina-intensive race state.
 
@@ -636,7 +638,7 @@ STATUS: historical scenario-specific observation.
 
 ---
 
-26. STAMINA_VS_POWER
+## 26. STAMINA_VS_POWER
 
 Guide 4 contains explicit comparisons between overcapping Stamina and increasing Power.
 
@@ -674,7 +676,7 @@ Threshold requirements
 
 ---
 
-27. OVERCAP_STAMINA
+## 27. OVERCAP_STAMINA
 
 Guide 4 describes a track-specific Stamina Battle mechanic.
 
@@ -688,7 +690,7 @@ STATUS: historical/version-specific.
 
 ---
 
-28. POWER_VS_GUTS
+## 28. POWER_VS_GUTS
 
 Guide 4 provides a historical comparison where:
 
@@ -702,7 +704,7 @@ STATUS: track-specific analysis.
 
 ---
 
-29. LEAGUE_OF_HEROES_FORMAT
+## 29. LEAGUE_OF_HEROES_FORMAT
 
 Guide 4 repeatedly distinguishes League of Heroes from Champions Meeting.
 
@@ -719,7 +721,7 @@ Never transfer a League of Heroes recommendation directly to Champions Meeting w
 
 ---
 
-30. CHAMPIONS_MEETING_FORMAT
+## 30. CHAMPIONS_MEETING_FORMAT
 
 Champions Meeting analysis can emphasize:
 
@@ -738,7 +740,7 @@ Best for CM
 
 ---
 
-31. DEBUFFERS
+## 31. DEBUFFERS
 
 Guide 4 contains both positive and negative historical opinions about debuffers depending on the event.
 
@@ -763,13 +765,11 @@ Do not treat debuffers as universally good or bad.
 
 ---
 
-32. TRACK_PROFILE_EXAMPLES
+## 32. TRACK_PROFILE_EXAMPLES
 
 The following historical profiles are useful as examples of how track geometry changes build evaluation.
 
----
-
-32.01 KYOTO_1600_TURF
+### 32.01 KYOTO_1600_TURF
 
 Historical Guide 4 entries include:
 
@@ -788,9 +788,7 @@ The source repeatedly analyzes:
 
 STATUS: historical track profile.
 
----
-
-32.02 CHUUKYO_1800_DIRT
+### 32.02 CHUUKYO_1800_DIRT
 
 Distance: 1800m
 Surface: Dirt
@@ -806,9 +804,7 @@ Source observations:
 - High Wisdom is described as beneficial in the examined event.
 - Final-corner spurt timing strongly affects acceleration skill selection.
 
----
-
-32.03 NIIGATA_1000_TURF
+### 32.03 NIIGATA_1000_TURF
 
 Distance: 1000m
 Surface: Turf
@@ -826,9 +822,7 @@ Source observations:
 - Guts is valuable because of final-straight competition.
 - Speed can be sacrificed somewhat for Power/Guts compared with normal builds.
 
----
-
-32.04 TOKYO_2400_TURF
+### 32.04 TOKYO_2400_TURF
 
 Distance: 2400m
 Surface: Turf
@@ -847,9 +841,7 @@ Source observations:
 - Stamina requirements can be high.
 - Positioning skills are important for non-Runners.
 
----
-
-32.05 KYOTO_3200_TURF
+### 32.05 KYOTO_3200_TURF
 
 Distance: 3200m
 Surface: Turf
@@ -864,9 +856,7 @@ Source observations:
 - Long-race strategy can favor frontlines depending on format.
 - The source gives approximately 1300+ Stamina as a historical target for the examined LOH event.
 
----
-
-32.06 NAKAYAMA_2500_TURF
+### 32.06 NAKAYAMA_2500_TURF
 
 Distance: 2500m
 Surface: Turf
@@ -884,9 +874,7 @@ Source observations:
 - Historical safe-build discussion used approximately "1250 Stamina + 1000 Guts".
 - Recovery can substitute for some raw Stamina.
 
----
-
-32.07 LONGCHAMP_2400_TURF
+### 32.07 LONGCHAMP_2400_TURF
 
 Distance: 2400m
 Surface: Turf
@@ -905,3 +893,5 @@ Source observations:
 - Stamina and Power thresholds are relevant.
 - Non-Runner early-position skills can be important.
 - Th
+
+> **NOTE — FILE ENDS HERE.** The last line was cut off when the file was saved.
