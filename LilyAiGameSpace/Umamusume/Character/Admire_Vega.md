@@ -1,3 +1,173 @@
+# Admire Vega (Original) | Uma Musume | GameTora
+[< Back to character list](https://gametora.com/umamusume/characters)
+
+\[Starry Nocturne\]
+
+Admire Vega
+-----------
+
+⭐⭐⭐
+
+Japanese name
+
+アドマイヤベガ
+
+Release date
+
+2026-03-05
+
+![Admire Vega (Original)](https://gametora.com/images/umamusume/characters/chara_stand_1033_103301.png)
+
+Japanese name
+
+アドマイヤベガ
+
+Voice actor
+
+Release date
+
+2026-03-05
+
+Birthday
+
+???
+
+Height
+
+cm
+
+Three sizes
+
+???
+
+Obtained from
+-------------
+
+Standard Gacha
+
+Gallery
+-------
+
+Base stats
+----------
+
+Stat bonuses
+------------
+
+![Speed](https://gametora.com/images/umamusume/icons/utx_ico_obtain_00.png)
+
+10%
+
+![Stamina](https://gametora.com/images/umamusume/icons/utx_ico_obtain_01.png)
+
+\-
+
+![Power](https://gametora.com/images/umamusume/icons/utx_ico_obtain_02.png)
+
+20%
+
+![Guts](https://gametora.com/images/umamusume/icons/utx_ico_obtain_03.png)
+
+\-
+
+![Wit](https://gametora.com/images/umamusume/icons/utx_ico_obtain_04.png)
+
+\-
+
+Aptitude
+--------
+
+Objectives
+----------
+
+### Junior
+
+#### 1\. Participate in the Junior Make Debut
+
+Turn 12
+
+Turf – 2000m – Medium
+
+#### 2\. Place 5th or better in the Hopeful Stakes
+
+Turn 24 (previous + 11)
+
+Junior Class
+
+,
+
+Late December
+
+G1 – Turf – 2000m – Medium
+
+### Classic
+
+#### 3\. Place 5th or better in the Satsuki Sho
+
+Turn 31 (previous + 6)
+
+Classic Class
+
+,
+
+Early April
+
+G1 – Turf – 2000m – Medium
+
+#### 4\. Place 5th or better in the Tokyo Yushun (Japanese Derby)
+
+Turn 34 (previous + 2)
+
+G1 – Turf – 2400m – Medium
+
+#### 5\. Participate in the Kikuka Sho
+
+Turn 44 (previous + 9)
+
+Classic Class
+
+,
+
+Late October
+
+G1 – Turf – 3000m – Long
+
+### Senior
+
+#### 6\. Place 3rd or better in the Takarazuka Kinen
+
+Turn 60 (previous + 15)
+
+G1 – Turf – 2200m – Medium
+
+#### 7\. Place 3rd or better in the Tenno Sho (Autumn)
+
+Turn 68 (previous + 7)
+
+Senior Class
+
+,
+
+Late October
+
+G1 – Turf – 2000m – Medium
+
+#### 8\. Place 1st in the Japan Cup
+
+Turn 70 (previous + 1)
+
+Senior Class
+
+,
+
+Late November
+
+G1 – Turf – 2400m – Medium
+
+**Newest Scenario**
+
+**Newest Update**
+
 # Admire Vega
 
 
