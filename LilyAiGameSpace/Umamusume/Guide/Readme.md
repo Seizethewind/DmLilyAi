@@ -109,6 +109,26 @@ An uma.guide article on the fourth scenario, Grand Concert (Grand Live). It give
 
 An uma.guide guide to the Trackblazer (Make A New Track) scenario. It covers Speed and Wit and Wit and Guts deck frameworks, race-heavy careers of 30 to 40 races, and Grade Point objectives with Shop Coin rewards. It includes large Race Bonus and Hammer stat tables, epithet routes (Tiara, Classic, Dirt and others), Rival Races, Coin Shop item values and the Race Fatigue odds table. It also covers Summer planning, Twinkle Star Climax scoring and Unique level requirements, which helps with schedules and shop purchases.
 
+#### [Career/Scenario/Grandmaster_Scenario.md](Career/Scenario/Grandmaster_Scenario.md)
+
+A master guide to the Grand Masters scenario by celery#6305, written for training strong Champions Meeting umas, with stat caps given. It explains knowledge fragments, crystals and the three goddess wisdoms, with tables of level bonuses and special-race effects. It then lays out an ideal run for junior, classic and senior years, wisdom timing and turn-planning leeway, fragment stat considerations and scenario skills. A deck section recommends three goddess cards plus two speed, two int and one flexible card, with inheritance by distance.
+
+#### [Career/Scenario/Project_Larc.md](Career/Scenario/Project_Larc.md)
+
+A master guide to the Project L'Arc scenario by celery#6305, with dated update notes from August to September 2023 and stat caps listed. It explains star gauges, SS and SSS matches, supporter points, the two L'Arc races and four preliminary VR races, and overseas aptitude with its tasks and unlock-node tables. It lists scenario-linked characters and their gold skills, then begins gameplay strategy, though the guide ends mid-section.
+
+#### [Career/Scenario/U.A.F.md](Career/Scenario/U.A.F.md)
+
+A master guide to the U.A.F. Ready Go! scenario by celery#6305, aimed at monthly PvP training, with stat caps and 2024 update notes. It explains competition training, genre links, heat-up effects, consultation and tournaments, with tables of level thresholds, bonuses per win and tournament timing. It lists scenario-linked characters, a competition-level gain formula, scenario gold skills and pink evolutions, then gameplay strategy and consultation usage by colour pattern, ending mid-section.
+
+#### [Career/Scenario/Run!Mecha.md](Career/Scenario/Run!Mecha.md)
+
+A master guide to the Run! Mecha Umamusume scenario by celery6305 for mid and long PvP builds, with stat caps and October 2024 update notes. It covers research levels, the overdrive gauge, upgrade events, and the Sati core and chip tuning tables, plus URA finals Super Overdrive. It also lists scenario-linked characters, scenario gold skills and evolutions, recommended tuning for each upgrade event, deckbuilding, a friend ID for borrowing Air Shakur, and an example Mayano run.
+
+#### [Career/Scenario/GreatFoodFestival.md](Career/Scenario/GreatFoodFestival.md)
+
+A master guide to the Harvesting! Feasting! Great Food Festival scenario by celery6305, aimed at short and mile PvP builds, with stat caps and 2024 update notes. It explains vegetable harvesting, field points, vegetable level tables and the Akikawa Yayoi link bonus. It covers cooking, cooking-point bonus breakpoints, tasting party requirements and dish lists with costs and effects, then scenario-linked characters and gold skills, ending mid-section.
+
 ### 5.3 Advanced career, gameplay and community guides
 
 #### [AdvanceCareerGuide/AdvanceCareerGuide.md](AdvanceCareerGuide/AdvanceCareerGuide.md)
@@ -147,41 +167,29 @@ A Markdown conversion of Luh's support card spreadsheet, updated 29/06/26, with 
 
 A very large text-only merge of three community spreadsheets, kept as Markdown tables. Section 1 is the Skills Reference, with a rank legend, glossary, category tables (speed, acceleration, stamina recovery, orange, debuff, green) and tier lists by running style and distance. Section 2 covers spark procs and lineage planning with affinity and a calculator guide. Section 3 is Luh's Support Card Encyclopedia with 13 scenario card tables. It ends with a workflow, credits and omissions, and helps players optimizing skills, inheritance and card choices.
 
-#### [CommunityGuide/Guide1.md](CommunityGuide/Guide1.md)
+#### [CommunityGuide/CommunityGuide_AI_updated.md](CommunityGuide/CommunityGuide_AI_updated.md)
 
-"UmaMusu Support Card Evaluation Doc" by celery6305, a support card ranking built from the author's own simulation-based rating tool and tuned to the JP meta scenario. Cards are scored at max limit break and grouped into Speed, Stamina, Power, Guts and Wisdom, plus Non-MLB and Friend/Group sections. It adds write-ups on top cards, a current-meta card table, a race bonus note, reroll recommendations and SSR pick ticket advice, and links to a score spreadsheet. Useful for deciding what to pull, build or reroll.
+The working AI knowledge base, distilled from four community guides (tagged G1 to G4: support-card evaluation, a broad gameplay reference, race mechanics, and Champions Meeting strategy). It is organised into numbered sections 00 to 22 covering terminology, training, stats, energy, motivation, inheritance, aptitudes, support cards, skills, racing, speed, lanes, overtaking, tracks, scenarios, strategy, run evaluation, decision rules, exceptions, verification and maintenance. Every entry carries a status tag (FACT, VALUE, FORMULA, CONDITION, RELATION, EVALUATION, STRATEGY, META or UNVERIFIED) so rankings and meta advice are not mistaken for mechanics, and reverse-engineered items keep that label. It includes aptitude, strategy and ground modifier tables. It is only partly populated, and sections still awaiting extraction (compatibility, lane rules, overtake targets) say so.
 
-#### [CommunityGuide/Guide2.md](CommunityGuide/Guide2.md)
+#### [CommunityGuide/CommunityGuide_AI.md](CommunityGuide/CommunityGuide_AI.md)
 
-"Uma Musume Reference", a large general reference written for the Japanese server that assumes the tutorial is done. Getting-started sections cover Global transfers, rerolling and tier lists, link passwords, new-player tips, common terms, an FAQ and menu translations. Gameplay sections cover gacha, training umas, inheritance and compatibility, finding friends, currencies, support card builds per scenario, and racing topics such as distance, dirt, team making and skill rankings by role. It links older-era versions of itself.
+The empty skeleton that `CommunityGuide_AI_updated.md` was filled in from. It has the same 00 to 22 section layout, the status tags and the usage rules, but nearly every section just says "To be populated". It holds no game information, so use the updated file for answers.
 
-#### [CommunityGuide/Guide3.md](CommunityGuide/Guide3.md)
+#### [CommunityGuide/CommunityGuide_AI_Guide1_Details.md](CommunityGuide/CommunityGuide_AI_Guide1_Details.md)
 
-"Uma Musume Race Mechanics" by KuromiAK, a technical reference on race logic drawing on community reverse engineering and simulator work, with a caveat that not everything is verified. It covers frame rate, sections, phases, stats, target speed, last spurt, acceleration, HP and stamina consumption and recovery skills. It details skill activation, conditions, scaling and cooldowns, then lane changes, blocking, vision, position keeping, pace modes, rushed state, spot struggle, dueling, stamina limit break and course data. It is aimed at advanced players and simulator developers.
+An extension module for the AI knowledge base covering Guide 1, celery6305's support-card evaluation doc for the JP meta. It explains the value model (main training, cross-training, race and event contribution), the six-phase training simulation, the bonus priority order, the fixed five-card comparison deck, why Group and Friend cards are left out, and rules for extracting card data without treating rankings as facts. It then lists card-by-card properties for Speed cards and part of the Stamina cards; the Stamina list stops partway through. Rankings here are evaluations tied to the JP meta, not universal facts.
 
-#### [CommunityGuide/Guide4.md](CommunityGuide/Guide4.md)
+#### [CommunityGuide/CommunityGuide_AI_Reference_G2.md](CommunityGuide/CommunityGuide_AI_Reference_G2.md)
 
-"pecan's Champions Meeting guides", a collection of Champions Meeting and League of Heroes guides by pecan, Steven and hanue_. It opens with links to the reference doc, mechanics doc, stamina calculator, parent search, track info and a skill visualizer. Monthly sections run from June 2023 through September 2024 (for example Kyoto 1600m, Niigata 1000m, Longchamp 2400m and Funabashi dirt), each with suggested umas by strategy and notes. Extra topics include stamina versus power, debuffers, accel inheritance and a Lone Wolf appendix.
+The reference module for Guide 2, the broad Uma Musume Reference. According to the source scope in the knowledge base, it covers terminology, training, inheritance, scenarios, skills, racing and practical guidance, and its recommendations stay tied to the scenario they came from.
 
-#### [CommunityGuide/Guide5.md](CommunityGuide/Guide5.md)
+#### [CommunityGuide/CommunityGuide_AI_Reference_G3.md](CommunityGuide/CommunityGuide_AI_Reference_G3.md)
 
-A master guide to the Grand Masters scenario by celery#6305, written for training strong Champions Meeting umas, with stat caps given. It explains knowledge fragments, crystals and the three goddess wisdoms, with tables of level bonuses and special-race effects. It then lays out an ideal run for junior, classic and senior years, wisdom timing and turn-planning leeway, fragment stat considerations and scenario skills. A deck section recommends three goddess cards plus two speed, two int and one flexible card, with inheritance by distance.
+The reference module for Guide 3, the race mechanics document by KuromiAK. According to the source scope in the knowledge base, it covers formulas, modifiers, HP and stamina behaviour, and skill activation, much of it reverse-engineered, so entries keep their unverified status. It suits advanced players and simulator work.
 
-#### [CommunityGuide/Guide6.md](CommunityGuide/Guide6.md)
+#### [CommunityGuide/CommunityGuide_AI_Reference_G4.md](CommunityGuide/CommunityGuide_AI_Reference_G4.md)
 
-A master guide to the Project L'Arc scenario by celery#6305, with dated update notes from August to September 2023 and stat caps listed. It explains star gauges, SS and SSS matches, supporter points, the two L'Arc races and four preliminary VR races, and overseas aptitude with its tasks and unlock-node tables. It lists scenario-linked characters and their gold skills, then begins gameplay strategy, though the file ends mid-section. It is a separate document from Guide7 and Guide9, despite similar size.
-
-#### [CommunityGuide/Guide7.md](CommunityGuide/Guide7.md)
-
-A master guide to the U.A.F. Ready Go! scenario by celery#6305, aimed at monthly PvP training, with stat caps and 2024 update notes. It explains competition training, genre links, heat-up effects, consultation and tournaments, with tables of level thresholds, bonuses per win and tournament timing. It lists scenario-linked characters, a competition-level gain formula, scenario gold skills and pink evolutions, then gameplay strategy and consultation usage by colour pattern, ending mid-section. It is distinct from Guide6 and Guide9.
-
-#### [CommunityGuide/Guide8.md](CommunityGuide/Guide8.md)
-
-A master guide to the Run! Mecha Umamusume scenario by celery6305 for mid and long PvP builds, with stat caps and October 2024 update notes. It covers research levels, the overdrive gauge, upgrade events, and the Sati core and chip tuning tables, plus URA finals Super Overdrive. It also lists scenario-linked characters, scenario gold skills and evolutions, recommended tuning for each upgrade event, deckbuilding, a friend ID for borrowing Air Shakur, and an example Mayano run.
-
-#### [CommunityGuide/Guide9.md](CommunityGuide/Guide9.md)
-
-A master guide to the Harvesting! Feasting! Great Food Festival scenario by celery6305, aimed at short and mile PvP builds, with stat caps and 2024 update notes. It explains vegetable harvesting, field points, vegetable level tables and the Akikawa Yayoi link bonus. It covers cooking, cooking-point bonus breakpoints, tasting party requirements and dish lists with costs and effects, then scenario-linked characters and gold skills, ending mid-section. It is distinct from Guide6 and Guide7.
+The reference module for Guide 4, pecan's Champions Meeting and League of Heroes guides. According to the source scope in the knowledge base, it holds track-specific strategy, inheritance, skill, stamina, stat and character recommendations. Each recommendation applies only to the event and course conditions it was written for.
 
 ### 5.4 Inheritance and affinity
 
