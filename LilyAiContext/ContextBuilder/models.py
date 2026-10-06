@@ -21,6 +21,7 @@ class ContextInput:
     web_snippets: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
     tool_schemas: list[dict[str, Any]] = field(default_factory=list)
+    mode: str = ""  # request mode key (chat/manage/analyst/simulator); "" = legacy behaviour
 
 
 @dataclass

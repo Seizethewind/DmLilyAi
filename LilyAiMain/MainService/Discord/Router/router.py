@@ -13,10 +13,13 @@ from LilyAiMain.MainService.Interaction.Forms.forms import FormManager
 from LilyAiMain.MainService.Interaction.Forms.link_trainer import LinkTrainerFlow
 from LilyAiMain.MainService.Interaction.Menus.menus import HELP_TEXT, main_menu
 from LilyAiMain.MainService.Interaction.messages import IncomingMessage, MenuItem, OutgoingMessage
+from LilyAiMain.MainService.Interaction.Modes import MODES, match_switch, menu_text, mode_menu, mode_of, suggest_mode, switch_text
+from LilyAiMain.MainService.Interaction.Modes.modes import CURRENT_RE, MENU_RE
 from LilyAiMain.MainService.Interaction.Onboarding.onboarding import OnboardingFlow
 from LilyAiMain.MainService.Interaction.Polls.polls import PollManager
 from LilyAiMain.MainService.Interaction.Workflows.career_review import CareerReview
 from LilyAiMain.MainService.Interaction.Workflows.chat_workflow import ChatRequest, ChatWorkflow
+from LilyAiMain.MainService.Interaction.Workflows.veteran_intake import VeteranIntakeFlow
 from LilyAiMemory.service import MemoryService
 
 log = get_logger("router")
@@ -78,6 +81,7 @@ class DMRouter:
         link_trainer: LinkTrainerFlow,
         guides: GuideBuilder | None = None,
         career: CareerReview | None = None,
+        veterans: VeteranIntakeFlow | None = None,
     ):
         self.memory, self.chat, self.replies, self.bus = memory, chat, replies, bus
         self.sessions, self.limiter, self.access = sessions, limiter, access
@@ -88,6 +92,8 @@ class DMRouter:
         self.guides = guides or GuideBuilder(None, chat.provider, chat.settings.chat_model, memory.guide_cache)
         # Screenshots of a finished trainee: read by a vision model, judged in code against the guide docs.
         self.career = career or CareerReview(chat.provider)
+        # Screenshots of a veteran, in Simulator Mode: read by the same vision model, saved per user.
+        self.veterans = veterans or VeteranIntakeFlow(chat.provider, memory.veterans)
 
     async def route(self, msg: IncomingMessage) -> list[OutgoingMessage]:
         if msg.images:
@@ -124,7 +130,12 @@ class DMRouter:
             return self._out(msg, [OutgoingMessage(f"Give me about {int(wait) + 1}s to catch up, then try again.", kind="system")])
 
         async with self.sessions.lock(uid):
-            out = await self.career.review(msg.images, caption)
+            session, _ = self.memory.session.touch(uid)
+            # Simulator Mode: the screenshots are veterans to save. Everywhere else they are a career review, as before.
+            if mode_of(session).key == "simulator":
+                out = await self.veterans.intake(uid, msg.images, caption)
+            else:
+                out = await self.career.review(msg.images, caption)
         return self._out(msg, out)
 
     def _out(self, msg: IncomingMessage, out: list[OutgoingMessage]) -> list[OutgoingMessage]:
@@ -168,6 +179,13 @@ class DMRouter:
         # 3. Natural-language intents (no slash commands)
         if _HELP.match(text):
             return sys(HELP_TEXT, main_menu())
+        # Modes: "mode" shows the four buttons, "simulator mode" switches. Handled here, never by the model.
+        new_mode = match_switch(text)
+        if new_mode:
+            session.data["mode"] = new_mode
+            return sys(switch_text(MODES[new_mode]))
+        if MENU_RE.match(text) or CURRENT_RE.match(text):
+            return sys(menu_text(mode_of(session)), mode_menu())
         if _SETUP.search(text):
             return sys(self.onboarding.start(uid))
         if _UNLINK.search(text):
@@ -206,16 +224,34 @@ class DMRouter:
                     return sys(self.guides.ask_text(saved), _guide_choice_menu())
                 return await self._guide_reply(uid, plan, force=False)
 
-        # 4. Chat
-        reply = await self.chat.handle(ChatRequest(uid, text, msg.display_name))
+        # 4. Chat (what the model may use depends on the mode)
+        mode = mode_of(session)
+        reply = await self.chat.handle(ChatRequest(uid, text, msg.display_name, mode.key))
         if not reply.ok:
             return sys(reply.text)
         rid = self.replies.add(ReplyRecord(uid, text, reply.text, reply.used_evidence, reply.domains))
         meta = {
             "model": reply.model, "tools": reply.tools_used, "domains": reply.domains,
-            "tokens": reply.token_estimate, "ms": round(reply.elapsed_ms),
+            "tokens": reply.token_estimate, "ms": round(reply.elapsed_ms), "mode": mode.key,
         }
-        return [OutgoingMessage(reply.text, reply_id=rid, meta=meta)]
+        out = [OutgoingMessage(reply.text, reply_id=rid, meta=meta)]
+        tip = self._mode_tip(session, mode, text)
+        return [*out, tip] if tip else out
+
+    def _mode_tip(self, session, mode, text: str) -> OutgoingMessage | None:
+        """After a reply: if another mode suits the message better, offer it once per mode per session (buttons).
+        The reply itself is never withheld or delayed by this."""
+        # The docs lookup is only needed from Chat Mode (see suggest_mode), so skip it everywhere else.
+        hit = mode.key == "chat" and bool(self.chat.tools.game_context(text))
+        target = suggest_mode(text, mode, hit)
+        shown: set = session.data.setdefault("mode_tips", set())
+        if target is None or target.key in shown:
+            return None
+        shown.add(target.key)
+        return OutgoingMessage(
+            f"Tip: {target.label} is built for this ({target.blurb}). Want to switch?", kind="system",
+            menu=[MenuItem(f"Switch to {target.label}", f"switch to {target.key} mode")],
+        )
 
     async def _guide_reply(self, uid: str, plan: GuidePlan, *, force: bool) -> list[OutgoingMessage]:
         """Serve the saved guide or build (and save) a new one. A failure is shown as a plain system message

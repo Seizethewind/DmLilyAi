@@ -47,6 +47,7 @@ from LilyAiMemory.service import MemoryService
 from LilyAiRag.service import RagService
 from LilyAiTask.DailyTask.DeficitTask.snapshot_job import run_daily_fan_gain
 from LilyAiTool.CollectionTools import collection_tools
+from LilyAiTool.SimulatorTools import simulator_tools
 from LilyAiTool.service import ToolContextData, ToolService, ToolSpec
 from LilyAiWeb.service import WebService
 
@@ -465,6 +466,10 @@ def build_app(
     # The user's own cards / trainees / parents (my_cards, my_trainees, my_parents, collection_followup).
     # Store and session are passed in here so the tool domain never imports Memory.
     for spec in collection_tools(memory.collection, memory.session):
+        tools.register(spec)
+    # Simulator Mode: the user's saved veterans + the race simulator. Empty (nothing registered) if the simulator's
+    # data files are missing.
+    for spec in simulator_tools(memory.veterans):
         tools.register(spec)
 
     umamoe = UmamoeClient(settings.umamoe_api_key) if settings.umamoe_api_key else None

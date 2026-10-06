@@ -1,5 +1,8 @@
 # Veteran
 
+> **In the bot,** veterans and results are stored per user in the database (`LilyAiMemory/Veteran`), not in this folder, and the bot reaches the simulator only through `../sim_service.py`.
+> This folder and `../VeteranStore.py` are for command-line use and for committing example veterans.
+
 This folder holds **veterans** (finished Uma Musume trainees) and the **results of simulations** run on them.
 The files here are written by `../VeteranStore.py`. The Simulator itself never writes files; it only prints JSON.
 

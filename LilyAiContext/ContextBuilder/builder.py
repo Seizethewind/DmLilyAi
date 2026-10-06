@@ -22,7 +22,7 @@ class ContextBuilder:
             "tools": format_tool_hint(ci.tool_schemas),
             "capabilities": format_capabilities(ci.tool_schemas),
         }
-        system = "\n\n".join([build_system_prompt(ci.display_name)] + [s for s in sections.values() if s])
+        system = "\n\n".join([build_system_prompt(ci.display_name, ci.mode)] + [s for s in sections.values() if s])
         fixed = estimate_tokens(system) + estimate_tokens(ci.user_message) + 16
         history, dropped = trim_history(history_to_messages(ci.history), max(0, self.token_budget - fixed))
 

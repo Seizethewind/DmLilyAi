@@ -23,8 +23,9 @@ class ToolService:
     def register(self, spec: ToolSpec) -> None:
         self.registry.register(spec)
 
-    def schemas(self) -> list[dict]:
-        return self.registry.schemas()
+    def schemas(self, categories: set[str] | frozenset[str] | None = None) -> list[dict]:
+        """Tool schemas, optionally limited to some categories (a request mode picks which)."""
+        return self.registry.schemas(set(categories) if categories is not None else None)
 
     def game_context(self, text: str) -> list[str]:
         """Game-doc snippets for a chat message that names a known Umamusume doc, else [].
