@@ -1,0 +1,81 @@
+name: Build simulator data
+
+# Downloads the datamined skill and course data from alpha123/uma-skill-tools
+# (GPL-3.0) and writes slim versions for the Umamusume race simulator:
+#   tools/sim_data/skills.json
+#   tools/sim_data/courses.json
+# (tools/build_sim_data.py). The data lives outside LilyAiGameSpace so it is not
+# picked up by the docs indexer.
+#
+# How to use:
+#   1. Actions tab > "Build simulator data" > Run workflow
+#   2. Set dry_run = true to only check the download and print counts.
+#
+# The run FAILS (red) if the download fails or far fewer skills/courses than
+# expected come back (the upstream format may have changed).
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Check the download and counts only, do not save files"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-sim-data
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DRY_RUN: ${{ inputs.dry_run }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Unit tests
+        run: python -m unittest discover -s tools/tests -v
+
+      - name: Build simulator data
+        run: |
+          args=()
+          if [ "$DRY_RUN" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          python -u tools/build_sim_data.py "${args[@]}" | tee build.log
+          exit "${PIPESTATUS[0]}"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Simulator data build"
+            echo '```'
+            tail -n 40 build.log 2>/dev/null || echo "no log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit data files
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/sim_data
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+          else
+            git commit -m "chore: update simulator data (skills, courses)"
+            git pull --rebase origin "${GITHUB_REF_NAME}" || true
+            git push
+          fi
