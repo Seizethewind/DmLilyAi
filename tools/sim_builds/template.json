@@ -1,0 +1,31 @@
+{
+  "_help": "Copy this file, change the values, run it. Keys starting with _ are ignored. Find ids with: Simulator.py --list-courses tokyo   and   Simulator.py --find-skill \"corner accel\"",
+  "course": "10606",
+  "_course": "10606 = Tokyo 2400m turf. Use --list-courses <text> to find your race.",
+  "ground": 1,
+  "_ground": "1 good, 2 yielding, 3 soft, 4 heavy",
+  "mood": 2,
+  "_mood": "2 great, 1 good, 0 normal, -1 bad, -2 awful",
+  "wisdom_checks": true,
+  "runs": 500,
+  "seed": 1,
+  "builds": {
+    "A": {
+      "_note": "Your current build. Stats = the five numbers on the trainee's status screen (before the race).",
+      "stats": {"speed": 1100, "stamina": 1100, "power": 900, "guts": 500, "wisdom": 700},
+      "style": "pace",
+      "_style": "front (nige), pace (senkou), late (sasi), end (oikomi), runaway (oonige)",
+      "aptitudes": {"distance": "A", "surface": "A", "strategy": "A"},
+      "_aptitudes": "Letters S A B C D E F G for the race's distance, turf/dirt, and your running style",
+      "skills": ["Corner Accel ○", "Straight Accel", "Last Leg"],
+      "_skills": "Every skill the trainee has, by exact English name or id (unique and inherited skills too)"
+    },
+    "B": {
+      "_note": "An alternative to compare. Delete this whole block if you only want one build.",
+      "stats": {"speed": 1100, "stamina": 1100, "power": 900, "guts": 500, "wisdom": 700},
+      "style": "pace",
+      "aptitudes": {"distance": "A", "surface": "A", "strategy": "A"},
+      "skills": ["Corner Accel ○", "Straight Accel", "Last Leg", "Corner Recovery ○"]
+    }
+  }
+}
