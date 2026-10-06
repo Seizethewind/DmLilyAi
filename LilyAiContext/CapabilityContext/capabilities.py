@@ -20,6 +20,11 @@ DM_ACTIONS: tuple[tuple[str, str], ...] = (
     ('"link me" or "my trainer id is 123456789"', "links the user's uma.moe Trainer ID to their Discord account"),
     ('"unlink me"', "removes that link"),
     ('"what\'s my trainer id" or "am I linked?"', "tells the user which Trainer ID is linked to them"),
+    (
+        '"mode" or "simulator mode"',
+        "shows the mode buttons or switches mode: Chat (default, web search), Manage (fan gain, leaderboard), "
+        "Analyst (game docs) or Simulator (veterans)",
+    ),
     ('"remember that ..."', "saves a fact about the user"),
     ('"what do you remember about me"', "lists the facts saved about the user"),
     ('"forget everything about me"', "erases saved facts and chat history (asks for confirmation first)"),

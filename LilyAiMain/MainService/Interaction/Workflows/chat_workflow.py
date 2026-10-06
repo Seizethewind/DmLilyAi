@@ -12,6 +12,7 @@ from LilyAiCore.Exceptions.errors import ProviderError
 from LilyAiCore.Logging.logger import get_logger
 from LilyAiCore.Providers.base import LLMProvider
 from LilyAiLearning.service import LearningService, extract_facts, name_from_message
+from LilyAiMain.MainService.Interaction.Modes import MODES, prompt_note
 from LilyAiMemory.service import MemoryService
 from LilyAiRag.service import RagService
 from LilyAiTool.service import ToolContextData, ToolService
@@ -32,6 +33,8 @@ class ChatRequest:
     user_id: str
     text: str
     display_name: str = ""
+    # chat | manage | analyst | simulator (see Interaction/Modes). "" = no mode: every tool and the game docs, as before.
+    mode: str = ""
 
 
 @dataclass
@@ -68,13 +71,16 @@ class ChatWorkflow:
         start = time.perf_counter()
         uid, text = req.user_id, req.text
 
+        mode = MODES.get(req.mode)
         rag_hits = self.rag.retrieve(text, k=3)
         # Game docs the message names (a character, the race list...) go straight into the prompt, so a
-        # plain "how's Special Week?" is answered from them without waiting on a tool call. [] otherwise.
-        game_snippets = self.tools.game_context(text)
+        # plain "how's Special Week?" is answered from them without waiting on a tool call. Only in Analyst Mode
+        # (or with no mode set); everywhere else the docs stay out so Chat answers like a chat.
+        game_snippets = self.tools.game_context(text) if (mode is None or mode.game_docs) else []
         history = [HistoryMessage(t.role, t.content) for t in self.memory.conversation.recent(uid, self.settings.history_turns)]
-        schemas = self.tools.schemas() if self.settings.web_enabled else [
-            s for s in self.tools.schemas() if s["function"]["name"] not in {"web_search", "read_webpage"}
+        all_schemas = self.tools.schemas(mode.categories if mode else None)
+        schemas = all_schemas if self.settings.web_enabled else [
+            s for s in all_schemas if s["function"]["name"] not in {"web_search", "read_webpage"}
         ]
         # Live account state goes into the prompt so the model doesn't have to guess (or decide to
         # call a tool) to know whether this user is linked to a Trainer ID.
@@ -87,8 +93,10 @@ class ChatWorkflow:
                 history=history,
                 user_facts=self.memory.relevant_user_facts(uid, text),
                 knowledge_snippets=[h.as_snippet() for h in rag_hits] + game_snippets,
-                notes=[account_status_note(link.trainer_id if link else None, link.trainer_name if link else None)],
+                notes=[account_status_note(link.trainer_id if link else None, link.trainer_name if link else None),
+                       *([prompt_note(mode)] if mode else [])],
                 tool_schemas=schemas,
+                mode=req.mode if mode else "",
             )
         )
         self.learning.context.record(built.token_estimate, built.dropped_history)
@@ -97,6 +105,7 @@ class ChatWorkflow:
         tool_ctx = ToolContextData(uid, req.display_name, {"domains": []})
         model = self.pick_model(text)
         used: list[str] = []
+        allowed = {sc["function"]["name"] for sc in schemas}
         final = None
         try:
             for round_no in range(MAX_TOOL_ROUNDS + 1):
@@ -107,8 +116,13 @@ class ChatWorkflow:
                     break
                 messages.append(final.raw_message)
                 for call in final.tool_calls:
-                    result = await self._run_tool(call.name, call.arguments, tool_ctx)
-                    used.append(call.name)
+                    if mode and call.name not in allowed:
+                        # The model asked for a tool from another mode: say so instead of running it.
+                        result = (f"Tool error: {call.name} isn't available in {mode.label}. Tell the user which mode "
+                                  "has it (say \"mode\" to see the buttons).")
+                    else:
+                        result = await self._run_tool(call.name, call.arguments, tool_ctx)
+                        used.append(call.name)   # only tools that actually ran, so reply meta and stats stay truthful
                     messages.append({"role": "tool", "tool_call_id": call.id, "content": result})
         except ProviderError as e:
             log.error("provider failed: %s", e)
