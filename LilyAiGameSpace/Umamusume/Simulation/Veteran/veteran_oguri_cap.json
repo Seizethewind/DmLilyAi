@@ -1,0 +1,50 @@
+{
+  "name": "Oguri Cap",
+  "stats": {
+    "speed": 1608,
+    "stamina": 747,
+    "power": 1250,
+    "guts": 623,
+    "wisdom": 775
+  },
+  "aptitudes": {
+    "distance": {
+      "short": "E",
+      "mile": "A",
+      "medium": "A",
+      "long": "S"
+    },
+    "surface": {
+      "turf": "A",
+      "dirt": "B"
+    },
+    "strategy": {
+      "front": "S",
+      "pace": "A",
+      "late": "A",
+      "end": "D"
+    }
+  },
+  "skills": [
+    "Festive Miracle",
+    "Victory Cheer!",
+    "Barcarole of Blessings",
+    "Nakayama Racecourse ◎",
+    "Winter Runner ○",
+    "Maverick ○",
+    "Professor of Curvature",
+    "Straightaway Adept",
+    "Straightaway Recovery",
+    "Nimble Navigator",
+    "Early Lead",
+    "Final Push",
+    "Innate Experience",
+    "Top Runner",
+    "Moxie",
+    "Front Runner Savvy ○",
+    "Triple 7s",
+    "Groundwork",
+    "Slipstream",
+    "See Ya Later!"
+  ]
+}
