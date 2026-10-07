@@ -15,7 +15,8 @@ op "verify" Drop every sentence of a drafted section whose numbers are not in th
     in : {"op":"verify","sections":[{"text","tags":["S1","C1"],"allowed":["passage text", ...]}]}
     out: {"sections":[{"text","dropped"}]}
 
-KEEP numbers_in / verify_section IN STEP with LilyAiGameSpace/number_check.py: tests/test_guide_ops.py checks they agree.
+KEEP numbers_in / verify_section IN STEP with LilyAiGameSpace/number_check.py and guide_builder.verify_section:
+tests/test_guide_ops.py checks that they agree.
 """
 from __future__ import annotations
 
@@ -29,45 +30,47 @@ PARAMS = Path("/workspace/params.json")
 # ----------------------------------------------------------------------------- numbers (same rules as number_check.py)
 _TAG = re.compile(r"\[([SC]\d+)\]")
 _NUM = re.compile(r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?!\d)(?!(?:st|nd|rd|th)\b)")
-_LIST_MARK = re.compile(r"^\s*(?:\d+[.)]\s+|[-*\u2022]\s+)")
-_BULLET = re.compile(r"^(\s*(?:[-*\u2022]|\d+[.)])\s+)")
+_LIST_MARK = re.compile(r"(?m)^\s*(?:[-*\u2022]|\d+[.)])\s+")
+_BULLET = re.compile(r"^\s*(?:[-*\u2022]|\d+[.)])\s+")
 
 
 def _canon(n: str) -> str:
     n = n.replace(",", "")
-    if "." in n:
-        n = n.rstrip("0").rstrip(".")
-    return n
+    return n.rstrip("0").rstrip(".") if "." in n else n
 
 
 def numbers_in(text: str) -> set[str]:
-    text = _TAG.sub(" ", text)
-    text = _LIST_MARK.sub("", text) if "\n" not in text else "\n".join(_LIST_MARK.sub("", ln) for ln in text.splitlines())
-    return {_canon(m.group(0)) for m in _NUM.finditer(text)}
+    """Every number in `text` (ignoring [S1] / [C1] tags and list numbering), normalised for comparison."""
+    text = _LIST_MARK.sub("", _TAG.sub(" ", text))
+    return {_canon(m) for m in _NUM.findall(text)}
 
 
 def verify_section(text: str, tags: set[str], allowed_texts: list[str]) -> tuple[str, int]:
+    """Returns (cleaned text, number of dropped sentences/lines). `allowed_texts` = the passages' title, section and text."""
     allowed: set[str] = set()
     for t in allowed_texts:
         allowed |= numbers_in(t)
     text = _TAG.sub(lambda m: m.group(0) if m.group(1) in tags else "", text)
+
+    kept: list[str] = []
     dropped = 0
-    kept_lines: list[str] = []
     for line in text.splitlines():
-        if not line.strip():
-            kept_lines.append(line)
+        if not line.strip() or numbers_in(line) <= allowed:
+            kept.append(line.rstrip())
             continue
-        if numbers_in(line) <= allowed:
-            kept_lines.append(line)
+        parts = re.split(r"(?<=[.!?])\s+", line.strip())
+        if len(parts) == 1:
+            dropped += 1
             continue
-        m = _BULLET.match(line)
-        prefix, body = (m.group(1), line[m.end():]) if m else ("", line)
-        sentences = re.split(r"(?<=[.!?])\s+", body)
-        good = [s for s in sentences if numbers_in(s) <= allowed]
-        dropped += len(sentences) - len(good)
+        good = [p for p in parts if numbers_in(p) <= allowed]
+        dropped += len(parts) - len(good)
         if good:
-            kept_lines.append(prefix + " ".join(good))
-    return "\n".join(kept_lines).strip(), dropped
+            joined = " ".join(good)
+            m = _BULLET.match(line)
+            if m and not _BULLET.match(joined):
+                joined = m.group(0) + joined
+            kept.append(joined)
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(kept)).strip(), dropped
 
 
 # ----------------------------------------------------------------------------- prep: choosing passages
