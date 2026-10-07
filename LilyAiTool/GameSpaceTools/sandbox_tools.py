@@ -1,7 +1,9 @@
-"""Groq tool: run fixed table operations (top N, sums, filters, comparisons) on Umamusume docs in a sandbox.
+"""Groq tools: run fixed table operations (top N, sums, filters, comparisons), game calculators and affinity maths.
 
-Only registered when PANDASTACK_API_KEY is set and the `pandastack` package is installed, so a bot
-without it behaves exactly as before and the model never sees a tool it cannot use.
+They run in a PandaStack sandbox when one is configured. When it isn't (no key, SDK missing, rate limited, hourly cap)
+the SAME fixed scripts run in the bot instead, so these tools are offered whenever sandbox_runner.can_run() is true and
+the reply says which way the numbers were produced. Set LILYAI_SANDBOX_LOCAL_FALLBACK=0 to go back to "sandbox only":
+then the tools are simply not offered without PANDASTACK_API_KEY and the pandastack package.
 """
 from __future__ import annotations
 
@@ -24,6 +26,11 @@ def _opt(args: dict, key: str):
     return value if value not in (None, "") else None
 
 
+def _how(in_sandbox: bool) -> str:
+    """Where the numbers were produced, so the model (and the user) can tell. Same script and rules either way."""
+    return "in a sandbox" if in_sandbox else "locally by the same fixed script, because the sandbox was unavailable"
+
+
 async def _process(ctx, args: dict) -> str:
     doc = _opt(args, "doc")
     if not doc:
@@ -32,11 +39,11 @@ async def _process(ctx, args: dict) -> str:
     params = {k: v for k, v in params.items() if v is not None}
     try:
         doc_id, title, path, text = sandbox_runner.raw_section_text(doc, _opt(args, "section"), _opt(args, "category"))
-        result = await sandbox_runner.run_table_op_async(text, params)
+        result, in_box = await sandbox_runner.run_table_op_ex_async(text, params)
     except sandbox_runner.SandboxError as e:
         raise ToolError(str(e))
     where = f"{title} > {path}" if path else title
-    return f"Computed from {where} [{doc_id}] (exact values from the docs table, calculated in a sandbox):\n{result}"
+    return f"Computed from {where} [{doc_id}] (exact values from the docs table, calculated {_how(in_box)}):\n{result}"
 
 
 CALCULATORS = ["help", "pvp_score", "legacy_blue_bonus", "blue_spark_odds", "white_spark_odds", "start_delay",
@@ -59,10 +66,10 @@ async def _calculate(ctx, args: dict) -> str:
     if not isinstance(inputs, dict):
         raise ToolError("inputs must be an object")
     try:
-        result = await sandbox_runner.run_calc_async(str(calc), inputs)
+        result, in_box = await sandbox_runner.run_calc_ex_async(str(calc), inputs)
     except sandbox_runner.SandboxError as e:
         raise ToolError(str(e))
-    return f"Calculated in a sandbox with the game docs' rules ({calc}):\n{result}"
+    return f"Calculated {_how(in_box)} with the game docs' rules ({calc}):\n{result}"
 
 
 _AFFINITY_SLOTS = ("legacy1", "legacy2", "sub11", "sub12", "sub21", "sub22")
@@ -91,18 +98,18 @@ async def _affinity(ctx, args: dict) -> str:
         else:
             payload, used = {"chars": data.chars, "aff2": data.aff2, "aff3": data.aff3}, data.chars
         params["names"] = {str(c): data.label(c) for c in used}
-        result = await sandbox_runner.run_affinity_async(params, json.dumps(payload, separators=(",", ":")))
+        result, in_box = await sandbox_runner.run_affinity_ex_async(params, json.dumps(payload, separators=(",", ":")))
     except affinity_data.AffinityError as e:
         raise ToolError(str(e))
     except sandbox_runner.SandboxError as e:
         raise ToolError(str(e))
     except ValueError:
         raise ToolError("bonus and top must be numbers")
-    return f"Affinity from the game's own relationship data, calculated in a sandbox:\n{result}"
+    return f"Affinity from the game's own relationship data, calculated {_how(in_box)}:\n{result}"
 
 
 def sandbox_tools() -> list[ToolSpec]:
-    if not sandbox_runner.is_configured():
+    if not sandbox_runner.can_run():
         return []
     return [
         ToolSpec(
