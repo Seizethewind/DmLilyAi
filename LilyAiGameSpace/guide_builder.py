@@ -3,19 +3,27 @@
 The engine does the retrieval and the model only writes from what it is handed:
 
     1. plan()     resolve the subject (no model call) and pick an outline (fixed template, or the doc's own headings)
-    2. gather     per outline item: search + read a few small passages, tagged [S1], [S2]...
+    2. gather     per outline item: search + read passages, tagged [S1], [S2]...
+       prep       (sandbox) pick the parts of those passages that best fit each section within the budget, and compute exact
+                  figures for numeric tables, tagged [C1], [C2]... Falls back to the old clipped passages if it can't run.
     3. write      one small model call per section, grounded only in that section's passages
-    4. verify     no-model check: any sentence whose numbers aren't in the passages is dropped, bad tags removed
+    4. verify     (sandbox) no-model check: any sentence whose numbers aren't in the passages is dropped, bad tags removed.
+                  Falls back to verify_section() below, which is the same rule.
     5. assemble   title + sections + a Sources footer built from the passages actually cited
     6. cache      build_and_store() saves successful guides; errors are never saved (see GuideCacheStore)
 
 Section calls run one after another (free-tier Groq limits), and a section with no passages costs no call.
 If any section's model call fails after one retry the whole build fails with ok=False and nothing is cached.
+
+The sandbox steps use sandbox_scripts/guide_ops.py: two PandaStack boots per guide (one prep, one verify) instead of one per
+section. The model API key never goes to the sandbox, only doc text and the drafted sections. Set LILYAI_GUIDE_SANDBOX=0 to
+turn the sandbox steps off (the guide is then built exactly as before).
 """
 from __future__ import annotations
 
 import asyncio
 import hashlib
+import os
 import re
 from dataclasses import dataclass, field
 from typing import Any, Protocol
@@ -24,6 +32,10 @@ from LilyAiCore.Exceptions.errors import ProviderError, RateLimitError
 from LilyAiCore.Helpers.clock import now_ts
 from LilyAiCore.Logging.logger import get_logger
 from LilyAiCore.Providers.base import LLMProvider
+from LilyAiGameSpace import sandbox_runner
+from LilyAiGameSpace.number_check import BULLET as _BULLET
+from LilyAiGameSpace.number_check import TAG as _TAG
+from LilyAiGameSpace.number_check import numbers_in
 from LilyAiGameSpace.UmamusumeGameSpaceEngine import Doc, UmamusumeGameSpaceEngine, get_engine
 
 log = get_logger("gamespace.guide")
@@ -33,6 +45,11 @@ SECTION_CHARS = 3000       # passage text handed to the model per section
 MAX_PASSAGE_CHARS = 2000
 MAX_PASSAGES = 5
 MAX_SECTION_TOKENS = 650
+# What is read before the sandbox picks the useful parts (only used when the sandbox step is on).
+RAW_SECTION_CHARS = 24000
+RAW_PASSAGE_CHARS = 12000
+RAW_MAX_PASSAGES = 6
+MAX_FACTS = 3              # exact table figures per section
 
 NO_DATA = "_The docs don't cover this yet._"
 GENERIC_ERROR = (
@@ -52,7 +69,9 @@ _SYSTEM = (
     "5. Ignore passages that aren't about the guide's subject.\n"
     "6. Output only the section body: short markdown bullets or short paragraphs, under 180 words, "
     "no heading, no intro or outro.\n"
-    "7. If the passages contain nothing useful for this section, output exactly: NO_DATA"
+    "7. If the passages contain nothing useful for this section, output exactly: NO_DATA\n"
+    "8. A passage tagged like [C1] holds exact figures calculated from a table in the docs. You may quote those figures "
+    "and cite the tag like any other source."
 )
 
 # (title, what it should cover, queries). {s} = subject, {g} = goal; empty parts are collapsed away.
@@ -85,10 +104,9 @@ _INTENT_WORDS = frozenset(
     "step by is some your own us".split()
 )
 
-_TAG = re.compile(r"\[(S\d+)\]")
-_NUM = re.compile(r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?!\d)(?!(?:st|nd|rd|th)\b)")
-_LIST_MARK = re.compile(r"(?m)^\s*(?:[-*\u2022]|\d+[.)])\s+")
-_BULLET = re.compile(r"^\s*(?:[-*\u2022]|\d+[.)])\s+")
+
+def _sandbox_default() -> bool:
+    return os.getenv("LILYAI_GUIDE_SANDBOX", "1").strip().lower() not in ("0", "false", "no", "off")
 
 
 class GuideCache(Protocol):
@@ -154,6 +172,7 @@ class _Registry:
     def __init__(self) -> None:
         self._tags: dict[tuple[str, str], str] = {}
         self.info: dict[str, tuple[str, str, str, str]] = {}  # tag -> (doc id, title, section, url)
+        self.computed: dict[str, tuple[str, str]] = {}        # [C#] tag -> (where the table is, doc id)
 
     def tag(self, doc_id: str, title: str, section: str, url: str) -> str:
         k = (doc_id, section)
@@ -180,17 +199,6 @@ def _age(ts: float) -> str:
     if secs < 48 * 3600:
         return f"{int(secs // 3600)} hours ago"
     return f"{int(secs // 86400)} days ago"
-
-
-def _canon(n: str) -> str:
-    n = n.replace(",", "")
-    return n.rstrip("0").rstrip(".") if "." in n else n
-
-
-def numbers_in(text: str) -> set[str]:
-    """Every number in `text` (ignoring [S1] tags and list numbering), normalised for comparison."""
-    text = _LIST_MARK.sub("", _TAG.sub(" ", text))
-    return {_canon(m) for m in _NUM.findall(text)}
 
 
 def _has_content(body: str) -> bool:
@@ -264,10 +272,13 @@ def _section_prompt(plan: GuidePlan, spec: SectionSpec, passages: list[Passage])
 
 class GuideBuilder:
     def __init__(self, engine: UmamusumeGameSpaceEngine | None, provider: LLMProvider, model: str,
-                 cache: GuideCache, *, pause_s: float = 0.0, retry_delay: float = 1.5):
+                 cache: GuideCache, *, pause_s: float = 0.0, retry_delay: float = 1.5,
+                 use_sandbox: bool | None = None):
         self._engine = engine
         self.provider, self.model, self.cache = provider, model, cache
         self.pause_s, self.retry_delay = pause_s, retry_delay
+        # None = follow LILYAI_GUIDE_SANDBOX (on by default). The sandbox steps fall back to local code on any problem.
+        self.use_sandbox = _sandbox_default() if use_sandbox is None else use_sandbox
         self._locks: dict[str, asyncio.Lock] = {}
 
     @property
@@ -320,18 +331,21 @@ class GuideBuilder:
             for t, ins, qs in template
         ]
 
-    # ------------------------------------------------------------- 2. gather
-    def _gather(self, spec: SectionSpec, subject_ids: list[str], reg: _Registry) -> list[Passage]:
+    # ------------------------------------------------------------- 2. gather (+ prep)
+    def _gather(self, spec: SectionSpec, subject_ids: list[str], reg: _Registry, *, raw: bool = False) -> list[Passage]:
+        """Passages for one section. raw=True reads much more text per passage, for the sandbox to choose from."""
         eng = self.engine
         out: list[Passage] = []
         covered: dict[str, list[str]] = {}
-        budget = SECTION_CHARS
+        budget = RAW_SECTION_CHARS if raw else SECTION_CHARS
+        per_passage = RAW_PASSAGE_CHARS if raw else MAX_PASSAGE_CHARS
+        max_passages = RAW_MAX_PASSAGES if raw else MAX_PASSAGES
 
         def add(doc_id: str, section: str | None) -> None:
             nonlocal budget
-            if budget < 400 or len(out) >= MAX_PASSAGES:
+            if budget < 400 or len(out) >= max_passages:
                 return
-            r = eng.read(doc_id, section, min(budget, MAX_PASSAGE_CHARS))
+            r = eng.read(doc_id, section, min(budget, per_passage))
             if r is None or not r.text.strip():
                 return
             path = r.section or ""
@@ -356,6 +370,49 @@ class GuideBuilder:
                 if h.doc_id in subject_ids or h.score >= floor:
                     add(h.doc_id, h.section)
         return out
+
+    async def _prepare(self, plan: GuidePlan, reg: _Registry) -> list[list[Passage]] | None:
+        """One sandbox run for the whole outline: per section, the best parts of the raw passages plus exact table figures.
+        None means "use the ordinary clipped passages" (sandbox step off, or anything went wrong)."""
+        if not self.use_sandbox:
+            return None
+        try:
+            raws = [self._gather(spec, plan.subject_ids, reg, raw=True) for spec in plan.outline]
+            if not any(raws):
+                return None
+            params = {
+                "op": "prep", "budget": SECTION_CHARS, "max_facts": MAX_FACTS,
+                "sections": [
+                    {"title": spec.title, "queries": [spec.title, plan.goal, *spec.queries],
+                     "passages": [{"tag": p.tag, "doc": p.title, "section": p.section, "text": p.text} for p in ps]}
+                    for spec, ps in zip(plan.outline, raws)
+                ],
+            }
+            result, in_box = await sandbox_runner.run_guide_ops_ex_async(params)
+            sections = result["sections"]
+            if len(sections) != len(raws):
+                raise ValueError("wrong number of sections back")
+            out: list[list[Passage]] = []
+            for ps, sec in zip(raws, sections):
+                by_tag = {p.tag: p for p in ps}
+                kept: list[Passage] = []
+                for item in sec.get("passages") or []:
+                    src = by_tag.get(item.get("tag"))
+                    text = str(item.get("text") or "").strip()
+                    if src and text:
+                        kept.append(Passage(src.tag, src.doc_id, src.title, src.section, text))
+                for fact in sec.get("facts") or []:
+                    tag, text = str(fact.get("tag") or ""), str(fact.get("text") or "").strip()
+                    if re.fullmatch(r"C\d+", tag) and text:
+                        origin = reg.info.get(str(fact.get("from") or ""))
+                        reg.computed[tag] = (str(fact.get("source") or ""), origin[0] if origin else "")
+                        kept.append(Passage(tag, "computed", "Computed", str(fact.get("source") or ""), text))
+                out.append(kept)
+            log.info("guide prep done %s for %d sections", "in the sandbox" if in_box else "locally", len(out))
+            return out
+        except Exception as e:
+            log.warning("guide prep failed (%s: %s); using the clipped passages", type(e).__name__, str(e)[:200])
+            return None
 
     # ------------------------------------------------------------- 3. write
     async def _write(self, plan: GuidePlan, spec: SectionSpec, passages: list[Passage]) -> tuple[str, str]:
@@ -384,36 +441,75 @@ class GuideBuilder:
             await asyncio.sleep(self.retry_delay)
         raise _BuildFailed(GENERIC_ERROR)
 
-    # ------------------------------------------------------------- 4+5. verify and assemble
+    # ------------------------------------------------------------- 4. verify
+    async def _verify_all(self, drafts: list[tuple[SectionSpec, str, list[Passage]]]) -> list[tuple[str, int]]:
+        """(cleaned text, dropped) per draft, in order. One sandbox run for all the drafts; verify_section() if that fails."""
+        out: list[tuple[str, int]] = [("", 0)] * len(drafts)
+        todo = [(i, raw, ps) for i, (_, raw, ps) in enumerate(drafts)
+                if ps and not raw.strip().upper().startswith("NO_DATA")]
+        if not todo:
+            return out
+        results: list[tuple[str, int]] | None = None
+        if self.use_sandbox:
+            try:
+                params = {"op": "verify", "sections": [
+                    {"text": raw, "tags": [p.tag for p in ps], "allowed": [f"{p.title} {p.section} {p.text}" for p in ps]}
+                    for _, raw, ps in todo]}
+                result, _ = await sandbox_runner.run_guide_ops_ex_async(params)
+                secs = result["sections"]
+                if len(secs) != len(todo):
+                    raise ValueError("wrong number of sections back")
+                results = [(str(s["text"]), int(s["dropped"])) for s in secs]
+            except Exception as e:
+                log.warning("guide verify in the sandbox failed (%s: %s); verifying locally", type(e).__name__, str(e)[:200])
+                results = None
+        if results is None:
+            results = [verify_section(raw, ps) for _, raw, ps in todo]
+        for (i, _, _), res in zip(todo, results):
+            out[i] = res
+        return out
+
+    # ------------------------------------------------------------- 5. assemble
     async def build(self, plan: GuidePlan) -> GuideResult:
         """Build one guide. Never raises; any failure is ok=False with a user-facing message (and is never cached)."""
         reg = _Registry()
-        bodies: list[tuple[str, str]] = []
-        used_tags: list[str] = []
-        model, dropped, data = "", 0, 0
+        drafts: list[tuple[SectionSpec, str, list[Passage]]] = []
+        model, called = "", 0
         try:
-            for spec in plan.outline:
-                passages = self._gather(spec, plan.subject_ids, reg)
+            prepped = await self._prepare(plan, reg)
+            for i, spec in enumerate(plan.outline):
+                mine = prepped[i] if prepped is not None else []
+                passages = mine if any(not p.tag.startswith("C") for p in mine) else self._gather(spec, plan.subject_ids, reg)
                 if not passages:
-                    bodies.append((spec.title, NO_DATA))
+                    drafts.append((spec, "", []))
                     continue
-                if data and self.pause_s:
+                if called and self.pause_s:
                     await asyncio.sleep(self.pause_s)
                 raw, used_model = await self._write(plan, spec, passages)
+                called += 1
                 model = model or used_model
-                body, d = verify_section(raw, passages)
-                dropped += d
-                if raw.strip().upper().startswith("NO_DATA") or not _has_content(body):
-                    bodies.append((spec.title, NO_DATA))
-                    continue
-                bodies.append((spec.title, body))
-                used_tags.extend(p.tag for p in passages)
-                data += 1
+                drafts.append((spec, raw, passages))
+            verified = await self._verify_all(drafts)
         except _BuildFailed as e:
             return GuideResult(False, e.message, title=plan.title)
         except Exception:
             log.exception("guide build crashed")
             return GuideResult(False, GENERIC_ERROR, title=plan.title)
+
+        bodies: list[tuple[str, str]] = []
+        used_tags: list[str] = []
+        dropped, data = 0, 0
+        for (spec, raw, passages), (body, d) in zip(drafts, verified):
+            if not passages:
+                bodies.append((spec.title, NO_DATA))
+                continue
+            dropped += d
+            if raw.strip().upper().startswith("NO_DATA") or not _has_content(body):
+                bodies.append((spec.title, NO_DATA))
+                continue
+            bodies.append((spec.title, body))
+            used_tags.extend(p.tag for p in passages)
+            data += 1
         if not data:
             return GuideResult(False, NOTHING_FOUND, title=plan.title)
 
@@ -425,9 +521,15 @@ class GuideBuilder:
         lines = []
         source_ids: list[str] = []
         for t in cited:
-            doc_id, title, section, url = reg.info[t]
-            source_ids.append(doc_id)
-            lines.append(f"[{t}] {title} > {section}" + (f" - <{url}>" if url else ""))
+            if t in reg.info:
+                doc_id, title, section, url = reg.info[t]
+                source_ids.append(doc_id)
+                lines.append(f"[{t}] {title} > {section}" + (f" - <{url}>" if url else ""))
+            elif t in reg.computed:
+                where, doc_id = reg.computed[t]
+                if doc_id:
+                    source_ids.append(doc_id)
+                lines.append(f"[{t}] Computed from {where} (exact figures calculated from the table)")
         parts.append("---\n**Sources** (game docs)\n" + "\n".join(lines))
         parts.append("_Built only from the game docs; anything they don't say is left out._")
         return GuideResult(
