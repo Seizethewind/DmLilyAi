@@ -46,7 +46,9 @@ from LilyAiMemory.JobRuns.job_run_store import JobRunStore
 from LilyAiMemory.service import MemoryService
 from LilyAiRag.service import RagService
 from LilyAiTask.DailyTask.DeficitTask.snapshot_job import run_daily_fan_gain
+from LilyAiTask.MonthlyTask.quota import get_quota
 from LilyAiTool.CollectionTools import collection_tools
+from LilyAiTool.ManageTools import fan_analytics_tools
 from LilyAiTool.SimulatorTools import simulator_tools
 from LilyAiTool.service import ToolContextData, ToolService, ToolSpec
 from LilyAiWeb.service import WebService
@@ -476,6 +478,10 @@ def build_app(
     umamoe_store = UmamoeStore(db) if umamoe else None
     if umamoe:
         for spec in _umamoe_tools(umamoe, settings.umamoe_circle_ids):
+            tools.register(spec)
+        # Manage Mode: quota / projection / pace / compare over the whole roster. The comparison runs in a PandaStack
+        # sandbox when PANDASTACK_API_KEY is set, otherwise (or if the sandbox is down) in-process with the same script.
+        for spec in fan_analytics_tools(umamoe, settings.umamoe_circle_ids, get_quota()):
             tools.register(spec)
     else:
         log.info("UMAMOE_API_KEY not set: uma.moe circle tracking (Leaderboard, check_umamoe) is disabled")
