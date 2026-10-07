@@ -4,9 +4,12 @@ Flow: the chat model picks a doc + operation -> this module pulls the RAW sectio
 engine (not the 2,000-char clipped passages the guide builder uses) -> uploads it with a fixed script
 (sandbox_scripts/docs_table_ops.py) to a throwaway microVM -> returns the printed result.
 Calculators work the same way with sandbox_scripts/game_calcs.py, but need no doc text: the rules are in the script.
+The guide builder uses sandbox_scripts/guide_ops.py the same way (pick passages, compute table figures, verify numbers).
 
 The model only supplies parameters. It never supplies code. Everything blocking is wrapped by
 run_table_op_async() so the bot's event loop is never stalled.
+
+One boot can serve several operations: run_table_batch_ex() sends up to 8 ops (and up to 6 doc sections) in a single run.
 
 If the sandbox can't be used (no key, SDK missing, every key rate limited, hourly cap reached, service down) the SAME
 fixed script runs in-process instead (see run_local), so a calculation never fails just because PandaStack is
@@ -28,6 +31,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 import threading
 import time
 from collections import OrderedDict, deque
@@ -42,7 +46,11 @@ log = get_logger("gamespace.sandbox")
 
 SCRIPT_DIR = Path(__file__).resolve().parent / "sandbox_scripts"
 TABLE_SCRIPT, CALC_SCRIPT, AFFINITY_SCRIPT = "docs_table_ops.py", "game_calcs.py", "affinity_calc.py"
+GUIDE_SCRIPT = "guide_ops.py"
 MAX_RAW_CHARS = 400_000          # far below the engine's 2 MB file cap; keeps the upload small
+MAX_BATCH_OPS = 8
+MAX_BATCH_SOURCES = 6
+MAX_BATCH_CHARS = 1_000_000      # all the doc text in one batch
 EXEC_TIMEOUT_S = 30
 SANDBOX_TTL_S = 120              # backstop: the VM reaps itself if we crash before kill()
 CACHE_TTL_S = 600
@@ -51,6 +59,7 @@ MAX_KEYS = 6
 COOLDOWN_RATE_LIMIT_S = 60        # key hit a rate limit: rest it briefly
 COOLDOWN_BAD_KEY_S = 3600         # key rejected or out of credit: rest it for an hour
 LOCAL_MAX_CHARS_DEFAULT = 8_000_000   # doc text plus data files a local run may be handed
+_SOURCE_NAME = re.compile(r"[A-Za-z0-9_-]{1,24}")
 
 
 class SandboxError(Exception):
@@ -243,11 +252,17 @@ def _classify(exc: Exception) -> float | None:
 
 
 # ------------------------------------------------------------------ local fallback
+def _sources_from_files(extra: dict[str, str]) -> dict[str, str]:
+    """The doc sections of a batch: files named src_<name>.md."""
+    return {k[len("src_"):-len(".md")]: v for k, v in extra.items() if k.startswith("src_") and k.endswith(".md")}
+
+
 # How to call each fixed script's own run() in-process. The signatures differ, so each gets one adapter.
 _LOCAL_RUNNERS: dict[str, Callable[[Any, str, dict, dict], dict]] = {
-    TABLE_SCRIPT: lambda mod, text, params, extra: mod.run(text, params),
+    TABLE_SCRIPT: lambda mod, text, params, extra: mod.run(text, params, _sources_from_files(extra)),
     CALC_SCRIPT: lambda mod, text, params, extra: mod.run(params),
     AFFINITY_SCRIPT: lambda mod, text, params, extra: mod.run(params, json.loads(extra["affinity.json"])),
+    GUIDE_SCRIPT: lambda mod, text, params, extra: mod.run(params),
 }
 
 
@@ -400,6 +415,26 @@ def run_table_op_ex(text: str, params: dict[str, Any], *,
     return _execute_ex(TABLE_SCRIPT, text, payload, sandbox_factory)
 
 
+def run_table_batch_ex(ops: list[dict[str, Any]], sources: dict[str, str], *,
+                       sandbox_factory: Callable[..., Any] | None = None) -> tuple[str, bool]:
+    """Several table operations in ONE run. `sources` maps a short name to the raw text of a docs section; each op
+    names its text with "source". Returns (text, ran_in_sandbox)."""
+    if not ops:
+        raise SandboxError("ops is empty.")
+    if len(ops) > MAX_BATCH_OPS:
+        raise SandboxError(f"At most {MAX_BATCH_OPS} operations per batch.")
+    if len(sources) > MAX_BATCH_SOURCES:
+        raise SandboxError(f"At most {MAX_BATCH_SOURCES} docs sections per batch.")
+    for name in sources:
+        if not _SOURCE_NAME.fullmatch(name):
+            raise SandboxError(f"{name!r} isn't a valid source name.")
+    if sum(len(t) for t in sources.values()) > MAX_BATCH_CHARS:
+        raise SandboxError("That batch has too much doc text. Split it up or name smaller sections.")
+    payload = json.dumps({"ops": ops}, sort_keys=True, ensure_ascii=False)
+    extra = {f"src_{name}.md": text for name, text in sources.items()}
+    return _execute_ex(TABLE_SCRIPT, "", payload, sandbox_factory, extra_files=extra)
+
+
 def run_calc_ex(calculator: str, inputs: dict[str, Any], *,
                 sandbox_factory: Callable[..., Any] | None = None) -> tuple[str, bool]:
     """Rule-based game calculators (PvP score, sparks, race maths...). Returns (text, ran_in_sandbox)."""
@@ -413,6 +448,21 @@ def run_affinity_ex(params: dict[str, Any], data_json: str, *,
     Returns (text, ran_in_sandbox). See sandbox_scripts/affinity_calc.py."""
     payload = json.dumps(params, sort_keys=True, ensure_ascii=False)
     return _execute_ex(AFFINITY_SCRIPT, "", payload, sandbox_factory, extra_files={"affinity.json": data_json})
+
+
+def run_guide_ops_ex(params: dict[str, Any], *,
+                     sandbox_factory: Callable[..., Any] | None = None) -> tuple[dict[str, Any], bool]:
+    """The guide builder's helpers (op "prep": pick passages and compute table figures; op "verify": check numbers).
+    Returns (the script's JSON result, ran_in_sandbox). See sandbox_scripts/guide_ops.py."""
+    payload = json.dumps(params, sort_keys=True, ensure_ascii=False)
+    text, in_box = _execute_ex(GUIDE_SCRIPT, "", payload, sandbox_factory)
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        raise SandboxError("The guide helper returned an unreadable result.")
+    if not isinstance(data, dict):
+        raise SandboxError("The guide helper returned an unreadable result.")
+    return data, in_box
 
 
 def run_table_op(text: str, params: dict[str, Any], *, sandbox_factory: Callable[..., Any] | None = None) -> str:
@@ -446,9 +496,17 @@ async def run_table_op_ex_async(text: str, params: dict[str, Any], **kw: Any) ->
     return await asyncio.to_thread(run_table_op_ex, text, params, **kw)
 
 
+async def run_table_batch_ex_async(ops: list[dict[str, Any]], sources: dict[str, str], **kw: Any) -> tuple[str, bool]:
+    return await asyncio.to_thread(run_table_batch_ex, ops, sources, **kw)
+
+
 async def run_calc_ex_async(calculator: str, inputs: dict[str, Any], **kw: Any) -> tuple[str, bool]:
     return await asyncio.to_thread(run_calc_ex, calculator, inputs, **kw)
 
 
 async def run_affinity_ex_async(params: dict[str, Any], data_json: str, **kw: Any) -> tuple[str, bool]:
     return await asyncio.to_thread(run_affinity_ex, params, data_json, **kw)
+
+
+async def run_guide_ops_ex_async(params: dict[str, Any], **kw: Any) -> tuple[dict[str, Any], bool]:
+    return await asyncio.to_thread(run_guide_ops_ex, params, **kw)

@@ -11,6 +11,7 @@ from LilyAiCore.Constants.constants import MAX_TOOL_ROUNDS
 from LilyAiCore.Exceptions.errors import ProviderError
 from LilyAiCore.Logging.logger import get_logger
 from LilyAiCore.Providers.base import LLMProvider
+from LilyAiGameSpace import number_check
 from LilyAiLearning.service import LearningService, extract_facts, name_from_message
 from LilyAiMain.MainService.Interaction.Modes import MODES, prompt_note
 from LilyAiMemory.service import MemoryService
@@ -129,6 +130,7 @@ class ChatWorkflow:
             return ChatReply(FALLBACK_ERROR, ok=False, elapsed_ms=(time.perf_counter() - start) * 1000)
 
         reply_text = (final.content if final else "") or "I couldn't put a good answer together. Could you rephrase that?"
+        reply_text = self._check_numbers(req.mode if mode else "", reply_text, messages)
         self.memory.conversation.append(uid, "user", text)
         self.memory.conversation.append(uid, "assistant", reply_text)
 
@@ -148,6 +150,32 @@ class ChatWorkflow:
             token_estimate=built.token_estimate,
             elapsed_ms=(time.perf_counter() - start) * 1000,
         )
+
+    def _check_numbers(self, mode_key: str, reply: str, messages: list) -> str:
+        """Analyst Mode only: look for numbers in the reply that appear nowhere in what the model was shown (the docs in the
+        prompt, tool results, the user's message). LILYAI_ANALYST_NUMBER_CHECK picks what happens: off, log (default), flag
+        (add a note) or drop (remove the sentences). A failure here never breaks the reply."""
+        if mode_key != "analyst" or not reply:
+            return reply
+        policy = number_check.policy()
+        if policy == "off":
+            return reply
+        try:
+            evidence = [m["content"] for m in messages if isinstance(m, dict) and isinstance(m.get("content"), str)]
+            result = number_check.check_reply(reply, evidence)
+        except Exception:
+            log.exception("analyst number check failed")
+            return reply
+        if not result.suspects:
+            return reply
+        log.warning("analyst reply has numbers not found in its evidence (%s): %s | %s", policy,
+                    ", ".join(result.numbers[:8]), " / ".join(s[:120] for s in result.suspects[:3]))
+        if policy == "drop" and number_check.has_content(result.cleaned):
+            return result.cleaned
+        if policy == "flag":
+            return (reply + "\n\n_Heads up: I couldn't trace these numbers to the game docs or a calculator: "
+                    + ", ".join(result.numbers[:8]) + ". Please double-check them._")
+        return reply
 
     async def _run_tool(self, name: str, arguments: dict, tool_ctx: ToolContextData) -> str:
         """Run one tool call and always return a string for the model to see - even on

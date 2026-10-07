@@ -1,7 +1,7 @@
-"""Affinity (compatibility) calculator. Runs INSIDE a PandaStack sandbox, never in the bot. Standard library only.
+"""Affinity (compatibility) calculator. Runs INSIDE a PandaStack sandbox (or in-process as the fallback). Standard library only.
 
 Uploaded files:
-    /workspace/params.json    {"op": "total" | "best" | "partners", "main": id, ...}  (ids already resolved by the bot)
+    /workspace/params.json    {"op": "total" | "best" | "partners" | "parents", "main": id, ...}  (ids already resolved by the bot)
     /workspace/affinity.json  {"chars": [...], "aff2": [n*n], "aff3": [n*n*n]}  - either the whole game file or a slice of it
 Prints one JSON object: {"ok": true, "text": "..."} or {"ok": false, "error": "..."}.
 
@@ -11,6 +11,11 @@ Formula (GameTora's own explanation of its calculator; the aff3 layout was check
     + `bonus`, a number the caller supplies for G1-race wins (the community sources disagree on that rule, so it is NOT guessed).
 Tiers (community sources, three agree): triangle 50 or less, circle 51-150, double circle 151 or more.
 GameTora's live tool is the authority for the tiers.
+
+op "parents" scores the user's SAVED parents for one trainee. params["parents"] is a list of
+    {"id": 3, "label": "#3 Special Week", "uma": <affinity id>, "gps": [<affinity id>, ...]}
+For each parent: its side = pair(main, parent) + triple(main, parent, each grandparent). For each two parents: the full total =
+both sides + pair(parent1, parent2). Both lists are printed best first.
 """
 from __future__ import annotations
 
@@ -157,7 +162,69 @@ def op_partners(d: Data, p: dict) -> str:
     return f"Highest pair affinity with {d.name(main)} (out of {len(ranked)} characters):\n" + "\n".join(lines)
 
 
-OPS = {"total": op_total, "best": op_best, "partners": op_partners}
+def op_parents(d: Data, p: dict) -> str:
+    main = d.need(p.get("main"))
+    items = p.get("parents")
+    if not isinstance(items, list) or not items:
+        raise CalcError("give at least one saved parent")
+    top = max(1, min(int(p.get("top") or 5), 10))
+    bonus = float(p.get("bonus") or 0)
+    sides = []      # (side total, label, uma id, pair part, sub part, grandparent ids used)
+    skipped: list[str] = []
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        label = str(it.get("label") or f"#{it.get('id')}")
+        try:
+            uma = d.need(it.get("uma"))
+        except (CalcError, TypeError, ValueError):
+            skipped.append(f"{label} (not in the affinity data)")
+            continue
+        if uma == main:
+            skipped.append(f"{label} (same character as the trainee)")
+            continue
+        pair_part = d.pair(main, uma)
+        sub_part, used = 0, []
+        for g in it.get("gps") or []:
+            try:
+                gid = d.need(g)
+            except (CalcError, TypeError, ValueError):
+                continue
+            if gid in (main, uma) or gid in used:
+                continue
+            sub_part += d.triple(main, uma, gid)
+            used.append(gid)
+        sides.append((pair_part + sub_part, label, uma, pair_part, sub_part, used))
+    if not sides:
+        raise CalcError("none of the saved parents are in the affinity data")
+    sides.sort(key=lambda s: (-s[0], s[1]))
+    out = [f"Affinity of {d.name(main)} with each saved parent (pair + that parent's sub-legacies), best first:"]
+    for i, (side, label, _, pair_part, sub_part, used) in enumerate(sides[:15], 1):
+        subs = f" from {', '.join(d.name(g) for g in used)}" if used else ""
+        out.append(f"{i}. {label}: {side} (pair {pair_part} + sub-legacies {sub_part}{subs})")
+    if len(sides) > 15:
+        out.append(f"...(+{len(sides) - 15} more parents)")
+    pairs = []
+    for i in range(len(sides)):
+        for j in range(i + 1, len(sides)):
+            a, b = sides[i], sides[j]
+            both = d.pair(a[2], b[2])
+            pairs.append((a[0] + b[0] + both, a, b, both))
+    if pairs:
+        pairs.sort(key=lambda t: (-t[0], t[1][1], t[2][1]))
+        out.append("")
+        out.append("Best two-parent pairs (both sides + the pair between the two parents):")
+        for i, (total, a, b, both) in enumerate(pairs[:top], 1):
+            final = total + bonus
+            note = " [same character twice: the parents' own pair scores 0]" if a[2] == b[2] else ""
+            out.append(f"{i}. {a[1]} + {b[1]}: {final:g} = {tier(final)} (sides {a[0]} + {b[0]}, parents' pair {both}){note}")
+        out.append("Race-win bonuses (shared G1 wins) " + (f"of {bonus:g} are included." if bonus else "are not included; pass bonus to add them."))
+    if skipped:
+        out.append("Not scored: " + "; ".join(skipped))
+    return "\n".join(out)
+
+
+OPS = {"total": op_total, "best": op_best, "partners": op_partners, "parents": op_parents}
 
 
 def run(params: dict, raw: dict) -> dict:
