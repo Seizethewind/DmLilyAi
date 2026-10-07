@@ -1,4 +1,4 @@
-"""Runs fixed table operations on Umamusume docs inside a PandaStack sandbox.
+"""Runs fixed table operations on Umamusume docs inside a PandaStack sandbox, with a local fallback.
 
 Flow: the chat model picks a doc + operation -> this module pulls the RAW section text from the
 engine (not the 2,000-char clipped passages the guide builder uses) -> uploads it with a fixed script
@@ -8,22 +8,30 @@ Calculators work the same way with sandbox_scripts/game_calcs.py, but need no do
 The model only supplies parameters. It never supplies code. Everything blocking is wrapped by
 run_table_op_async() so the bot's event loop is never stalled.
 
+If the sandbox can't be used (no key, SDK missing, every key rate limited, hourly cap reached, service down) the SAME
+fixed script runs in-process instead (see run_local), so a calculation never fails just because PandaStack is
+unavailable. A genuine script error (a bad parameter) is raised either way. manage_runner does the same for Manage Mode.
+
 Env:
     PANDASTACK_API_KEY             one key, or up to 6 comma-separated (e.g. psk_a,psk_b,psk_c), like GROQ_API_KEY.
                                    Runs are spread evenly across the keys; a key that is rate limited, out of credit
                                    or rejected is skipped for a while and the next key is tried automatically.
     PANDASTACK_TEMPLATE            default "code-interpreter"
     PANDASTACK_MAX_RUNS_PER_HOUR   default 30 PER KEY (cost guard for each key's free-tier credit)
+    LILYAI_SANDBOX_LOCAL_FALLBACK  default on; 0/false/no/off turns the in-process fallback off
+    LILYAI_SANDBOX_LOCAL_MAX_CHARS default 8,000,000; a local run is refused above this many input characters
 """
 from __future__ import annotations
 
 import asyncio
 import hashlib
+import importlib.util
 import json
 import os
 import threading
 import time
 from collections import OrderedDict, deque
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Callable
 
@@ -42,10 +50,15 @@ CACHE_MAX = 64
 MAX_KEYS = 6
 COOLDOWN_RATE_LIMIT_S = 60        # key hit a rate limit: rest it briefly
 COOLDOWN_BAD_KEY_S = 3600         # key rejected or out of credit: rest it for an hour
+LOCAL_MAX_CHARS_DEFAULT = 8_000_000   # doc text plus data files a local run may be handed
 
 
 class SandboxError(Exception):
     """A user-presentable failure (never includes keys or stack traces)."""
+
+
+class _LocalTooLarge(SandboxError):
+    """The input is too big for the in-process fallback (the sandbox's own error is reported instead)."""
 
 
 def load_keys() -> list[str]:
@@ -73,7 +86,25 @@ def sdk_installed() -> bool:
 
 
 def is_configured() -> bool:
+    """True when a real PandaStack sandbox can be used (key set and SDK installed)."""
     return api_key_set() and sdk_installed()
+
+
+def local_fallback_enabled() -> bool:
+    """The same fixed scripts, run inside the bot when the sandbox can't be used. On unless switched off."""
+    return os.getenv("LILYAI_SANDBOX_LOCAL_FALLBACK", "1").strip().lower() not in ("0", "false", "no", "off")
+
+
+def can_run() -> bool:
+    """True when the calculators can run at all: a configured sandbox, or the local fallback."""
+    return is_configured() or local_fallback_enabled()
+
+
+def _local_max_chars() -> int:
+    try:
+        return max(10_000, int(os.getenv("LILYAI_SANDBOX_LOCAL_MAX_CHARS", str(LOCAL_MAX_CHARS_DEFAULT))))
+    except ValueError:
+        return LOCAL_MAX_CHARS_DEFAULT
 
 
 # ------------------------------------------------------------------ raw doc text
@@ -211,6 +242,48 @@ def _classify(exc: Exception) -> float | None:
     return None
 
 
+# ------------------------------------------------------------------ local fallback
+# How to call each fixed script's own run() in-process. The signatures differ, so each gets one adapter.
+_LOCAL_RUNNERS: dict[str, Callable[[Any, str, dict, dict], dict]] = {
+    TABLE_SCRIPT: lambda mod, text, params, extra: mod.run(text, params),
+    CALC_SCRIPT: lambda mod, text, params, extra: mod.run(params),
+    AFFINITY_SCRIPT: lambda mod, text, params, extra: mod.run(params, json.loads(extra["affinity.json"])),
+}
+
+
+@lru_cache(maxsize=8)
+def _local_module(script_name: str):
+    """Load a sandbox script as a module without running its main(). Same file the microVM gets."""
+    path = SCRIPT_DIR / script_name
+    spec = importlib.util.spec_from_file_location(f"lilyai_sandbox_{path.stem}", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def run_local(script_name: str, input_text: str, params: dict[str, Any],
+              extra_files: dict[str, str] | None = None) -> str:
+    """Blocking. Run a fixed sandbox script in this process. Raises SandboxError with the script's own message on a bad
+    parameter, or _LocalTooLarge (a SandboxError) when the input is bigger than the local limit."""
+    runner = _LOCAL_RUNNERS.get(script_name)
+    if runner is None:
+        raise SandboxError("That operation can't run without the sandbox.")
+    extra_files = extra_files or {}
+    size = len(input_text) + sum(len(v) for v in extra_files.values())
+    if size > _local_max_chars():
+        raise _LocalTooLarge(f"The input is too large to run locally ({size:,} characters).")
+    try:
+        result = runner(_local_module(script_name), input_text, params, extra_files)
+    except SandboxError:
+        raise
+    except Exception:
+        log.exception("local sandbox script %s crashed", script_name)
+        raise SandboxError("The operation failed.")
+    if not result.get("ok"):
+        raise SandboxError(str(result.get("error") or "The operation failed."))
+    return str(result.get("text") or "")
+
+
 # ------------------------------------------------------------------ the run
 def _default_factory(template: str, ttl: int, api_key: str):
     from pandastack import Client   # imported lazily: the bot must start without the SDK
@@ -300,23 +373,61 @@ def _execute(script_name: str, input_text: str, payload: str, sandbox_factory: C
         _slots.release()
 
 
+def _execute_ex(script_name: str, input_text: str, payload: str, sandbox_factory: Callable[..., Any] | None,
+                extra_files: dict[str, str] | None = None, *, fallback: bool = True) -> tuple[str, bool]:
+    """Sandbox first, the same script in-process if the sandbox can't be used. Returns (text, ran_in_sandbox).
+
+    A script error (bad parameter) is the same error either way, so it is raised, not hidden. If the input is too big
+    for the local path, the sandbox's own error is raised instead.
+    """
+    try:
+        return _execute(script_name, input_text, payload, sandbox_factory, extra_files), True
+    except SandboxError as sandbox_error:
+        if not (fallback and local_fallback_enabled()):
+            raise
+        first = sandbox_error
+    log.info("%s: sandbox unavailable or refused (%s); running the same script locally", script_name, first)
+    try:
+        return run_local(script_name, input_text, json.loads(payload), extra_files), False
+    except _LocalTooLarge:
+        raise first
+
+
+def run_table_op_ex(text: str, params: dict[str, Any], *,
+                    sandbox_factory: Callable[..., Any] | None = None) -> tuple[str, bool]:
+    """Table operations (top, stat, filter, compare...) on raw doc text. Returns (text, ran_in_sandbox)."""
+    payload = json.dumps(params, sort_keys=True, ensure_ascii=False)
+    return _execute_ex(TABLE_SCRIPT, text, payload, sandbox_factory)
+
+
+def run_calc_ex(calculator: str, inputs: dict[str, Any], *,
+                sandbox_factory: Callable[..., Any] | None = None) -> tuple[str, bool]:
+    """Rule-based game calculators (PvP score, sparks, race maths...). Returns (text, ran_in_sandbox)."""
+    payload = json.dumps({"calculator": calculator, "inputs": inputs}, sort_keys=True, ensure_ascii=False)
+    return _execute_ex(CALC_SCRIPT, "", payload, sandbox_factory)
+
+
+def run_affinity_ex(params: dict[str, Any], data_json: str, *,
+                    sandbox_factory: Callable[..., Any] | None = None) -> tuple[str, bool]:
+    """Affinity totals and searches. `data_json` is the affinity file (whole, or a slice for one calculation).
+    Returns (text, ran_in_sandbox). See sandbox_scripts/affinity_calc.py."""
+    payload = json.dumps(params, sort_keys=True, ensure_ascii=False)
+    return _execute_ex(AFFINITY_SCRIPT, "", payload, sandbox_factory, extra_files={"affinity.json": data_json})
+
+
 def run_table_op(text: str, params: dict[str, Any], *, sandbox_factory: Callable[..., Any] | None = None) -> str:
     """Table operations (top, stat, filter, compare...) on raw doc text. See sandbox_scripts/docs_table_ops.py."""
-    payload = json.dumps(params, sort_keys=True, ensure_ascii=False)
-    return _execute(TABLE_SCRIPT, text, payload, sandbox_factory)
+    return run_table_op_ex(text, params, sandbox_factory=sandbox_factory)[0]
 
 
 def run_calc(calculator: str, inputs: dict[str, Any], *, sandbox_factory: Callable[..., Any] | None = None) -> str:
     """Rule-based game calculators (PvP score, sparks, race maths...). See sandbox_scripts/game_calcs.py."""
-    payload = json.dumps({"calculator": calculator, "inputs": inputs}, sort_keys=True, ensure_ascii=False)
-    return _execute(CALC_SCRIPT, "", payload, sandbox_factory)
+    return run_calc_ex(calculator, inputs, sandbox_factory=sandbox_factory)[0]
 
 
 def run_affinity(params: dict[str, Any], data_json: str, *, sandbox_factory: Callable[..., Any] | None = None) -> str:
-    """Affinity totals and searches. `data_json` is the affinity file (whole, or a slice for one calculation).
-    See sandbox_scripts/affinity_calc.py."""
-    payload = json.dumps(params, sort_keys=True, ensure_ascii=False)
-    return _execute(AFFINITY_SCRIPT, "", payload, sandbox_factory, extra_files={"affinity.json": data_json})
+    """Affinity totals and searches. See sandbox_scripts/affinity_calc.py."""
+    return run_affinity_ex(params, data_json, sandbox_factory=sandbox_factory)[0]
 
 
 async def run_table_op_async(text: str, params: dict[str, Any], **kw: Any) -> str:
@@ -329,3 +440,15 @@ async def run_calc_async(calculator: str, inputs: dict[str, Any], **kw: Any) -> 
 
 async def run_affinity_async(params: dict[str, Any], data_json: str, **kw: Any) -> str:
     return await asyncio.to_thread(run_affinity, params, data_json, **kw)
+
+
+async def run_table_op_ex_async(text: str, params: dict[str, Any], **kw: Any) -> tuple[str, bool]:
+    return await asyncio.to_thread(run_table_op_ex, text, params, **kw)
+
+
+async def run_calc_ex_async(calculator: str, inputs: dict[str, Any], **kw: Any) -> tuple[str, bool]:
+    return await asyncio.to_thread(run_calc_ex, calculator, inputs, **kw)
+
+
+async def run_affinity_ex_async(params: dict[str, Any], data_json: str, **kw: Any) -> tuple[str, bool]:
+    return await asyncio.to_thread(run_affinity_ex, params, data_json, **kw)
