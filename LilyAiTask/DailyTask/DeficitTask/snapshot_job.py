@@ -29,6 +29,15 @@ days. That state is persisted via LilyAiMemory.DeficitState.DeficitStateStore
 record_day()), so a process restart or Render redeploy carries it over
 instead of silently zeroing a trainer's carry.
 
+Two guards keep that persisted state honest:
+- Month boundary: state saved in an earlier calendar month (judged by the
+  store's updated_at) is reset before anything else happens, even on a day
+  that is itself skipped as a first_tracked_day, and even if the job missed
+  the 1st entirely. Otherwise last month's deficit leaks into the new month.
+- One quota day per trainer per UTC day: if this trainer's state was already
+  written today, a re-run (redeploy mid-day, manual trigger) skips them
+  instead of calling record_day() a second time and double-charging the day.
+
 There is no scraper here: fan data comes from the existing UmamoeClient (the
 same client that already powers check_umamoe and /api/leaderboard, configured
 via UMAMOE_API_KEY / UMAMOE_CIRCLE_IDS - see render.yaml and .env.example).
@@ -38,7 +47,7 @@ rank/points poll.
 """
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 import discord
 
@@ -58,6 +67,31 @@ def _is_first_of_month(now: datetime) -> bool:
     return now.day == 1
 
 
+def _saved_at(saved) -> datetime | None:
+    """When a saved DeficitState was last written (UTC), or None if the store
+    doesn't expose updated_at."""
+    ts = getattr(saved, "updated_at", None)
+    if ts is None:
+        return None
+    return datetime.fromtimestamp(float(ts), tz=timezone.utc)
+
+
+def _is_stale_state(saved, now: datetime) -> bool:
+    """True when saved carry/total_gained belongs to an earlier month and must
+    not be carried into this one. Falls back to "is today the 1st?" when the
+    saved record has no updated_at."""
+    saved_at = _saved_at(saved)
+    if saved_at is None:
+        return _is_first_of_month(now)
+    return (saved_at.year, saved_at.month) != (now.year, now.month)
+
+
+def _already_ran_today(saved, now: datetime) -> bool:
+    """True when this trainer's quota state was already written today (UTC)."""
+    saved_at = _saved_at(saved)
+    return saved_at is not None and saved_at.date() == now.date()
+
+
 async def _fetch_member_gains(umamoe: UmamoeClient, circle_id: int) -> dict[str, dict]:
     """trainer_id (uma.moe viewer_id, as str) -> member_gains() breakdown
     (total_fans/today_gain/daily_gain/monthly_gain/week_avg/first_tracked_day) for
@@ -75,13 +109,10 @@ async def _fetch_member_gains(umamoe: UmamoeClient, circle_id: int) -> dict[str,
 
 def _load_tracker(tracker_store: DeficitStateStore, club: str, trainer_id: str, now: datetime) -> DeficitTracker:
     """Rebuild a trainer's DeficitTracker from its last saved carry/total_gained,
-    or start fresh on the 1st of the month (a new tally period) or if nothing's
-    been saved for them yet."""
-    if _is_first_of_month(now):
-        tracker_store.reset(club, trainer_id)
-        return DeficitTracker()
+    or start fresh if nothing's been saved for them yet or what's saved is from an
+    earlier month (a new tally period)."""
     saved = tracker_store.get(club, trainer_id)
-    if saved is None:
+    if saved is None or _is_stale_state(saved, now):
         return DeficitTracker()
     return DeficitTracker(carry=saved.carry, total_gained=saved.total_gained)
 
@@ -115,7 +146,7 @@ async def run_daily_fan_gain(
         club: which club this run is for ("Umakraft" / "Umakraft 2").
         now: override for testing; defaults to current UTC time.
     """
-    now = now or datetime.utcnow()
+    now = now or datetime.now(timezone.utc)
     members = linked_members(trainer_link_store)
     if not members:
         return
@@ -131,6 +162,14 @@ async def run_daily_fan_gain(
 
         fan_store.record(club, member.trainer_id, gains["total_fans"])
 
+        # Month boundary first, before any skip below: on the 1st every trainer is a
+        # first_tracked_day, so resetting only inside the quota path (as this used to)
+        # meant the reset never ran and last month's carry leaked into day 2.
+        saved = tracker_store.get(club, member.trainer_id)
+        if saved is not None and _is_stale_state(saved, now):
+            tracker_store.reset(club, member.trainer_id)
+            saved = None
+
         if gains["first_tracked_day"]:
             # No earlier day of data to measure "today" against yet - either uma.moe just
             # detected this trainer (mid-month join) or this is the first poll of a new
@@ -138,8 +177,13 @@ async def run_daily_fan_gain(
             # this case (see gains.py), but feeding that 0 into record_day() would still
             # charge the full 5,000,000 daily quota as a deficit against someone who hasn't
             # had a chance to gain anything measurable yet. Skip quota tracking and the DM
-            # for this one day; nothing is written to tracker_store, so tomorrow's
-            # _load_tracker() starts from a clean carry=0 instead of an artificial deficit.
+            # for this one day; tomorrow's _load_tracker() starts from a clean carry=0
+            # instead of an artificial deficit.
+            continue
+
+        if saved is not None and _already_ran_today(saved, now):
+            # Already counted today (re-run after a redeploy / manual trigger). Calling
+            # record_day() again would add today's shortfall to the carry a second time.
             continue
 
         tracker = _load_tracker(tracker_store, club, member.trainer_id, now)
