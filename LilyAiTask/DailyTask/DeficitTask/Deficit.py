@@ -27,6 +27,10 @@ from typing import Iterable, Optional
 
 import discord
 
+from LilyAiCore.Logging.logger import get_logger
+
+log = get_logger("deficit_task")
+
 # Base daily quota - 150,000,000 monthly quota spread over 30 days.
 DAILY_QUOTA = 5_000_000
 
@@ -60,11 +64,20 @@ class LinkedMember:
 def linked_members(trainer_link_store) -> list[LinkedMember]:
     """Fetch every currently linked member from LilyAiMemory's TrainerLinkStore.
 
+    A malformed row (e.g. a non-numeric discord_id) is logged and skipped so
+    one bad link can't stop every other linked member from getting their DM.
+
     Args:
         trainer_link_store: A LilyAiMemory.TrainerLink.trainer_link.TrainerLinkStore
             (e.g. app.memory.trainer_link).
     """
-    return [LinkedMember.from_trainer_link(link) for link in trainer_link_store.all_linked()]
+    members: list[LinkedMember] = []
+    for link in trainer_link_store.all_linked():
+        try:
+            members.append(LinkedMember.from_trainer_link(link))
+        except (TypeError, ValueError, AttributeError) as e:
+            log.warning("skipping malformed trainer link %r: %s", link, e)
+    return members
 
 
 class DeficitTracker:
@@ -147,6 +160,11 @@ def format_daily_message(
     - Gained more than required -> reports surplus banked for tomorrow.
     - Gained less than required -> reports deficit owed, added to tomorrow.
 
+    "Required today" is shown floored at 0: a surplus bigger than the base
+    daily quota makes the tracker's internal requirement negative (the credit
+    still carries forward correctly), but "required: -2,000,000" isn't
+    something a person can act on.
+
     monthly_gain, when given, overrides result["total_gained"] for the
     "Monthly progress" line. Pass the figure from LilyAiCore.ExternalServices.
     Umamoe.gains.member_gains() (the same uma.moe daily_fans-based calculation
@@ -154,7 +172,7 @@ def format_daily_message(
     a trainer's monthly total.
     """
     gained = result["gained"]
-    required = result["required"]
+    required = max(0, result["required"])
     carry = result["carry"]
     total = monthly_gain if monthly_gain is not None else result["total_gained"]
     remaining = max(0, MONTHLY_QUOTA - total)
@@ -197,6 +215,9 @@ async def send_daily_dm(
     a uma.moe trainer ID) - if either is missing, the report is skipped
     rather than sent to a guessed/unverified user.
 
+    A failed send (DMs closed, user not found, a transient Discord error) is
+    logged and swallowed so it can't abort the loop for every member after them.
+
     Args:
         client: The logged-in discord.Client/Bot instance.
         member: The LinkedMember to DM (must have discord_id + trainer_id).
@@ -207,9 +228,15 @@ async def send_daily_dm(
     if not member.discord_id or not member.trainer_id:
         return
 
-    user = client.get_user(member.discord_id) or await client.fetch_user(member.discord_id)
-    message = format_daily_message(result, member, monthly_gain)
-    await user.send(message)
+    try:
+        user = client.get_user(member.discord_id) or await client.fetch_user(member.discord_id)
+        message = format_daily_message(result, member, monthly_gain)
+        await user.send(message)
+    except Exception as e:  # discord.Forbidden / NotFound / HTTPException, etc.
+        log.warning(
+            "daily quota DM failed for discord_id=%s trainer_id=%s: %s",
+            member.discord_id, member.trainer_id, e,
+        )
 
 
 async def send_daily_reports(
