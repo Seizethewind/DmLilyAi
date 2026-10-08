@@ -1,0 +1,43 @@
+name: Run tests
+
+# Runs the unit tests. Starts by itself on every push to chat-vm-tool and on pull requests into main, and can be
+# started by hand (Actions tab, "Run workflow") once this file is on the default branch.
+# Step 1 is the set that must pass for the Chat Mode VM tool. Step 2 runs the whole suite and only reports,
+# so a failure that was already there doesn't hide the result of step 1. Read both on the run page (job summary).
+
+on:
+  push:
+    branches: [chat-vm-tool]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install -r requirements.txt pytest
+
+      - name: VM tool, modes and sandbox tests
+        shell: bash
+        run: |
+          python -m pytest tests/test_vm_tool.py tests/test_modes_simulator.py tests/test_sandbox_fallback.py -q 2>&1 | tee focus.txt
+          { echo "### VM tool, modes and sandbox tests"; echo '```'; tail -n 30 focus.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Whole test suite (report only)
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          python -m pytest tests -q 2>&1 | tee all.txt
+          { echo "### Whole test suite"; echo '```'; tail -n 40 all.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
