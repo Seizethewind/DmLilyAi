@@ -3,7 +3,7 @@
 Why this exists: with every tool and every game doc in play on every turn, Lily kept answering from the docs.
 A mode narrows what one turn can use:
 
-    Chat       web search + everyday tools. No game docs. (default)
+    Chat       web search + everyday tools, and the optional VM (run_code). No game docs. (default)
     Manage     uma.moe workflow: fan gain, leaderboard, circle standing, trainer link, reminders.
     Analyst    the Umamusume docs: doc search/read, table maths, calculators, affinity, your collection.
     Simulator  veterans and the race simulator.
@@ -35,7 +35,8 @@ class Mode:
 MODES: dict[str, Mode] = {
     "chat": Mode(
         "chat", "Chat Mode", "everyday chat with web search",
-        frozenset({"web", "utility", "discord", "umapyoi"}),
+        # "vm" is the optional run_code tool: it is only registered when a PandaStack key and an allowed user are set.
+        frozenset({"web", "utility", "discord", "umapyoi", "vm"}),
     ),
     "manage": Mode(
         "manage", "Manage Mode", "leaderboard, fan gain and the other uma.moe workflow",

@@ -8,6 +8,7 @@ from LilyAiTool.GameSpaceTools.sandbox_tools import sandbox_tools
 from LilyAiTool.Models import ToolContextData, ToolResult, ToolSpec  # noqa: F401
 from LilyAiTool.Registry import ToolRegistry
 from LilyAiTool.UtilityTools import utility_tools
+from LilyAiTool.VmTools.vm_tools import vm_tools
 
 log = get_logger("tool.service")
 
@@ -17,7 +18,7 @@ class ToolService:
         self.registry = ToolRegistry()
         self.executor = ToolExecutor(self.registry)
         self.notifier_box = notifier_box or NotifierBox()
-        for spec in [*utility_tools(), *discord_tools(self.notifier_box), *game_space_tools(), *sandbox_tools()]:
+        for spec in [*utility_tools(), *discord_tools(self.notifier_box), *game_space_tools(), *sandbox_tools(), *vm_tools()]:
             self.registry.register(spec)
 
     def register(self, spec: ToolSpec) -> None:
