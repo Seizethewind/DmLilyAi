@@ -1,0 +1,506 @@
+{
+ "_comment": "In-game (Global) skill names -> simulator skill ids. Seeded by hand from umamusu.wiki; the 'Build simulator data' workflow rewrites it from the full wiki list (tools/build_skill_aliases.py). Each id was checked against skills.json.",
+ "version": 1,
+ "names": {
+  "Acceleration": [
+   "201062"
+  ],
+  "Barcarole of Blessings": [
+   "910151"
+  ],
+  "Calm in a Crowd": [
+   "200482"
+  ],
+  "Chukyo Racecourse ○": [
+   "200072"
+  ],
+  "Chukyo Racecourse ◎": [
+   "200071"
+  ],
+  "Cloudy Days ○": [
+   "200222"
+  ],
+  "Cloudy Days ◎": [
+   "200221"
+  ],
+  "Collaborative Graded Races ○": [
+   "202252"
+  ],
+  "Collaborative Graded Races ◎": [
+   "202251"
+  ],
+  "Competitive Spirit ○": [
+   "200282"
+  ],
+  "Competitive Spirit ◎": [
+   "200281"
+  ],
+  "Corner Acceleration ○": [
+   "200342"
+  ],
+  "Corner Adept ○": [
+   "200332"
+  ],
+  "Corner Recovery ○": [
+   "200352"
+  ],
+  "Countermeasure": [
+   "200992"
+  ],
+  "Deep Breaths": [
+   "200742"
+  ],
+  "Early Lead": [
+   "200532"
+  ],
+  "Extra Tank": [
+   "200762"
+  ],
+  "Fall Runner ○": [
+   "200192"
+  ],
+  "Fall Runner ◎": [
+   "200191"
+  ],
+  "Fast-Paced": [
+   "200542"
+  ],
+  "Festive Miracle": [
+   "910061",
+   "110061"
+  ],
+  "Final Push": [
+   "200552"
+  ],
+  "Firm Conditions ○": [
+   "200152"
+  ],
+  "Firm Conditions ◎": [
+   "200151"
+  ],
+  "Front Runner Corners ○": [
+   "201252"
+  ],
+  "Front Runner Corners ◎": [
+   "201251"
+  ],
+  "Front Runner Savvy ○": [
+   "201522"
+  ],
+  "Front Runner Straightaways ○": [
+   "201242"
+  ],
+  "Front Runner Straightaways ◎": [
+   "201241"
+  ],
+  "Fukushima Racecourse ○": [
+   "200102"
+  ],
+  "Fukushima Racecourse ◎": [
+   "200101"
+  ],
+  "Funabashi Racecourse ○": [
+   "202212"
+  ],
+  "Funabashi Racecourse ◎": [
+   "202211"
+  ],
+  "Gap Closer": [
+   "200672"
+  ],
+  "Hakodate Racecourse ○": [
+   "200092"
+  ],
+  "Hakodate Racecourse ◎": [
+   "200091"
+  ],
+  "Hanshin Racecourse ○": [
+   "200052"
+  ],
+  "Hanshin Racecourse ◎": [
+   "200051"
+  ],
+  "Homestretch Haste": [
+   "200512"
+  ],
+  "Huge Lead": [
+   "200982"
+  ],
+  "Innate Experience": [
+   "200751"
+  ],
+  "Inner Post Proficiency ○": [
+   "200252"
+  ],
+  "Inner Post Proficiency ◎": [
+   "200251"
+  ],
+  "Inside Scoop": [
+   "200752"
+  ],
+  "Kawasaki Racecourse ○": [
+   "202202"
+  ],
+  "Kawasaki Racecourse ◎": [
+   "202201"
+  ],
+  "Keeping the Lead": [
+   "201192"
+  ],
+  "Kokura Racecourse ○": [
+   "200122"
+  ],
+  "Kokura Racecourse ◎": [
+   "200121"
+  ],
+  "Kyoto Racecourse ○": [
+   "200062"
+  ],
+  "Kyoto Racecourse ◎": [
+   "200061"
+  ],
+  "Lay Low": [
+   "200442"
+  ],
+  "Leader's Pride": [
+   "201272"
+  ],
+  "Left-Handed ○": [
+   "200022"
+  ],
+  "Left-Handed ◎": [
+   "200021"
+  ],
+  "Long Corners ○": [
+   "201182"
+  ],
+  "Long Corners ◎": [
+   "201181"
+  ],
+  "Long Shot ○": [
+   "200302"
+  ],
+  "Long Shot ◎": [
+   "200301"
+  ],
+  "Long Straightaways ○": [
+   "201172"
+  ],
+  "Long Straightaways ◎": [
+   "201171"
+  ],
+  "Masterful Gambit": [
+   "200632"
+  ],
+  "Maverick ○": [
+   "200272"
+  ],
+  "Maverick ◎": [
+   "200271"
+  ],
+  "Medium Corners ○": [
+   "201112"
+  ],
+  "Medium Corners ◎": [
+   "201111"
+  ],
+  "Medium Straightaways ○": [
+   "201102"
+  ],
+  "Medium Straightaways ◎": [
+   "201101"
+  ],
+  "Meticulous Measures": [
+   "201002"
+  ],
+  "Mile Corners ○": [
+   "201042"
+  ],
+  "Mile Corners ◎": [
+   "201041"
+  ],
+  "Mile Straightaways ○": [
+   "201032"
+  ],
+  "Mile Straightaways ◎": [
+   "201031"
+  ],
+  "Morioka Racecourse ○": [
+   "202222"
+  ],
+  "Morioka Racecourse ◎": [
+   "202221"
+  ],
+  "Moxie": [
+   "201282"
+  ],
+  "Nakayama Racecourse ○": [
+   "200042"
+  ],
+  "Nakayama Racecourse ◎": [
+   "200041"
+  ],
+  "Night Races ○": [
+   "202232"
+  ],
+  "Night Races ◎": [
+   "202231"
+  ],
+  "Niigata Racecourse ○": [
+   "200112"
+  ],
+  "Niigata Racecourse ◎": [
+   "200111"
+  ],
+  "Nimble Navigator": [
+   "200492"
+  ],
+  "Non-Standard Distance ○": [
+   "200142"
+  ],
+  "Non-Standard Distance ◎": [
+   "200141"
+  ],
+  "Oi Racecourse ○": [
+   "200952"
+  ],
+  "Oi Racecourse ◎": [
+   "200951"
+  ],
+  "Outer Post Proficiency ○": [
+   "200262"
+  ],
+  "Outer Post Proficiency ◎": [
+   "200261"
+  ],
+  "Outer Swell": [
+   "200612"
+  ],
+  "Pace Strategy": [
+   "200472"
+  ],
+  "Passing Pro": [
+   "201202"
+  ],
+  "Position Pilfer": [
+   "200592"
+  ],
+  "Preferred Position": [
+   "200572"
+  ],
+  "Prepared to Pass": [
+   "200582"
+  ],
+  "Pressure": [
+   "201212"
+  ],
+  "Productive Plan": [
+   "200682"
+  ],
+  "Professor of Curvature": [
+   "200331"
+  ],
+  "Rainy Days ○": [
+   "200232"
+  ],
+  "Rainy Days ◎": [
+   "200231"
+  ],
+  "Ramp Up": [
+   "200462"
+  ],
+  "Right-Handed ○": [
+   "200012"
+  ],
+  "Right-Handed ◎": [
+   "200011"
+  ],
+  "Rosy Outlook": [
+   "200712"
+  ],
+  "Sapporo Racecourse ○": [
+   "200082"
+  ],
+  "Sapporo Racecourse ◎": [
+   "200081"
+  ],
+  "Second Wind": [
+   "201292"
+  ],
+  "See Ya Later!": [
+   "201662"
+  ],
+  "Sharp Turns ○": [
+   "202242"
+  ],
+  "Sharp Turns ◎": [
+   "202241"
+  ],
+  "Shifting Gears": [
+   "201052"
+  ],
+  "Slick Surge": [
+   "200602"
+  ],
+  "Snowy Days ○": [
+   "200242"
+  ],
+  "Snowy Days ◎": [
+   "200241"
+  ],
+  "Soft Step": [
+   "201142"
+  ],
+  "Speed Eater": [
+   "201082"
+  ],
+  "Spring Runner ○": [
+   "200172"
+  ],
+  "Spring Runner ◎": [
+   "200171"
+  ],
+  "Sprint Corners ○": [
+   "200972"
+  ],
+  "Sprint Corners ◎": [
+   "200971"
+  ],
+  "Sprint Straightaways ○": [
+   "200962"
+  ],
+  "Sprint Straightaways ◎": [
+   "200961"
+  ],
+  "Sprinting Gear": [
+   "200652"
+  ],
+  "Stamina Eater": [
+   "201222"
+  ],
+  "Stamina to Spare": [
+   "200562"
+  ],
+  "Standard Distance ○": [
+   "200132"
+  ],
+  "Standard Distance ◎": [
+   "200131"
+  ],
+  "Standing By": [
+   "200622"
+  ],
+  "Steadfast": [
+   "200732"
+  ],
+  "Straightaway Acceleration": [
+   "200372"
+  ],
+  "Straightaway Adept": [
+   "200362"
+  ],
+  "Straightaway Recovery": [
+   "200382"
+  ],
+  "Straightaway Spurt": [
+   "200642"
+  ],
+  "Summer Runner ○": [
+   "200182"
+  ],
+  "Summer Runner ◎": [
+   "200181"
+  ],
+  "Sunny Days ○": [
+   "200212"
+  ],
+  "Sunny Days ◎": [
+   "200211"
+  ],
+  "Target in Sight ○": [
+   "200292"
+  ],
+  "Target in Sight ◎": [
+   "200291"
+  ],
+  "Thunderbolt Step": [
+   "201132"
+  ],
+  "Tokyo Racecourse ○": [
+   "200032"
+  ],
+  "Tokyo Racecourse ◎": [
+   "200031"
+  ],
+  "Triumphant Pulse": [
+   "900061",
+   "100061"
+  ],
+  "Unyielding Spirit": [
+   "201072"
+  ],
+  "Up-Tempo": [
+   "200722"
+  ],
+  "Updrafters": [
+   "200702"
+  ],
+  "Victory Cheer!": [
+   "900681"
+  ],
+  "Wait-and-See": [
+   "200662"
+  ],
+  "Watchful Eye": [
+   "200692"
+  ],
+  "Wet Conditions ○": [
+   "200162"
+  ],
+  "Wet Conditions ◎": [
+   "200161"
+  ],
+  "Winter Runner ○": [
+   "200202"
+  ],
+  "Winter Runner ◎": [
+   "200201"
+  ]
+ },
+ "unmodelled": {
+  "Dodging Danger": "201262",
+  "Flustered End Closers": "200931",
+  "Flustered Front Runners": "200841",
+  "Flustered Late Surgers": "200901",
+  "Flustered Pace Chasers": "200871",
+  "Focus": "200432",
+  "Frenzied End Closers": "200821",
+  "Frenzied Front Runners": "200791",
+  "Frenzied Late Surgers": "200811",
+  "Frenzied Pace Chasers": "200801",
+  "Go with the Flow": "200502",
+  "Hawkeye": "201122",
+  "Hesitant End Closers": "200941",
+  "Hesitant Front Runners": "200851",
+  "Hesitant Late Surgers": "200911",
+  "Hesitant Pace Chasers": "200881",
+  "Intimidate": "201012",
+  "Murmur": "201162",
+  "Opening Gambit": "201092",
+  "Prudent Positioning": "200452",
+  "Restart": "201302",
+  "Smoke Screen": "201232",
+  "Stop Right There!": "201022",
+  "Subdued End Closers": "200921",
+  "Subdued Front Runners": "200831",
+  "Subdued Late Surgers": "200891",
+  "Subdued Pace Chasers": "200861",
+  "Tether": "201152",
+  "Trick (Front)": "200771",
+  "Trick (Rear)": "200781"
+ },
+ "unique_owner": {
+  "110061": "Oguri Cap",
+  "100061": "Oguri Cap"
+ }
+}

@@ -75,6 +75,7 @@ def simulator_tools(store: VeteranStore) -> list[ToolSpec]:
         if not hits:
             return f"No skill name contains {query!r}. Try a shorter word."
         return "\n".join(f"{h['id']}: {h['name']}" + (f" ({h['name_jp']})" if h.get("name_jp") else "")
+                         + (f" [in-game name: {h['global']}]" if h.get("global") and h["global"] != h["name"] else "")
                          + (" [partly modelled]" if h["partial"] else "") for h in hits)
 
     def sim_list_courses(ctx: ToolContextData, args: dict) -> str:
@@ -126,8 +127,9 @@ def simulator_tools(store: VeteranStore) -> list[ToolSpec]:
         ),
         ToolSpec(
             "sim_find_skill",
-            "Search the simulator's skill list by name. Skill names must match exactly, so use this to find the exact name "
-            "(with its ○ or ◎) before passing it as add_skills.",
+            "Search the simulator's skill list by name (the in-game name or the datamined one). Use it to find a skill's id, "
+            "and pass that id in add_skills. If sim_run warns that a skill name was not recognised, that is a name "
+            "mismatch, not a missing skill: search here and re-run with the id.",
             {"type": "object", "properties": {"query": {"type": "string", "description": "Part of a skill name, e.g. 'corner recovery'"}},
              "required": ["query"]},
             sim_find_skill, category=CATEGORY,
@@ -144,12 +146,14 @@ def simulator_tools(store: VeteranStore) -> list[ToolSpec]:
             "sim_run",
             "Run the Monte Carlo race simulator on one of the user's saved veterans on a course and return finish-time statistics. "
             "Optionally add skills to compare 'as saved' (A) against 'with these extra skills' (B). Quote the numbers exactly as "
-            "returned and mention any warnings. It models a single runner, so results are for comparing builds, not predicting a real race.",
+            "returned and mention any warnings. A warning that a name was not recognised means the name did not match, not "
+            "that the skill is missing from the database; never say that. A skill reported as not simulated acts on other "
+            "runners or the start and cannot be modelled. It models a single runner, so results are for comparing builds, not predicting a real race.",
             {"type": "object", "properties": {
                 "veteran": {"type": "string", "description": "The veteran's # number (e.g. '2') or name"},
                 "course": {"type": "string", "description": "Course id from sim_list_courses"},
                 "style": {"type": ["string", "null"], "description": "front, pace, late or end; default is the veteran's best style"},
-                "add_skills": {"type": ["array", "null"], "items": {"type": "string"}, "description": "Exact skill names to add as build B"},
+                "add_skills": {"type": ["array", "null"], "items": {"type": "string"}, "description": "Skill ids (preferred, from sim_find_skill) or in-game names to add as build B"},
                 "ground": {"type": ["string", "null"], "description": "good (default), yielding, soft or heavy"},
                 "mood": {"type": ["integer", "null"], "description": "-2 (awful) to 2 (great); default 2"},
                 "runs": {"type": ["integer", "null"], "description": "Races to simulate, 50-1000; default 300"},

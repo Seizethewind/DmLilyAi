@@ -58,6 +58,7 @@ under "warnings".
 from __future__ import annotations
 
 import argparse
+import difflib
 import json
 import math
 import os
@@ -65,6 +66,7 @@ import random
 import re
 import statistics
 import sys
+import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -117,10 +119,54 @@ def find_data_dir(explicit: str | None = None) -> Path:
         "(tools/build_sim_data.py) or pass --data-dir.")
 
 
+# Level marks on skill names. A vision model often reads the single circle as the letter "O".
+_MARK_MAP = {"◎": "◎", "⊚": "◎", "◉": "◎", "⦾": "◎",
+             "○": "○", "◯": "○", "〇": "○", "⚪": "○", "◦": "○", "⭘": "○",
+             "×": "×", "✕": "×", "✖": "×", "╳": "×"}
+_MARKS = "".join(sorted(set(_MARK_MAP.values())))
+
+
+def skill_key(text) -> str:
+    """Comparison key for a skill name: ignores case, spaces, punctuation and width, and unifies the level mark.
+    'Victory Cheer!' -> 'victorycheer'; 'Corner Recovery O' and 'Corner Recovery ◯' -> 'cornerrecovery○'.
+    The mark stays in the key, so 'X ◎' and 'X ○' remain different skills."""
+    s = unicodedata.normalize("NFKC", str(text)).strip()
+    s = "".join(_MARK_MAP.get(ch, ch) for ch in s)
+    s = re.sub(r"\s+[Oo0]$", " ○", s)
+    s = re.sub(r"\s+[xX]$", " ×", s)
+    return "".join(ch for ch in s.lower() if ch.isalnum() or ch in _MARKS)
+
+
+class UnmodelledSkill(ValueError):
+    """A real skill whose effects the simulator does not model (for example a debuff on other runners)."""
+
+
 class Data:
-    def __init__(self, skills: dict, courses: dict):
+    """skills.json + courses.json, plus skill_aliases.json when present.
+
+    skills.json carries the upstream (datamined) English names, which are often fan translations and differ from the
+    names the game shows. skill_aliases.json maps the in-game (Global) names to the same skill ids, so a veteran read
+    from a screenshot resolves. See tools/build_skill_aliases.py for how it is built and what its fields mean."""
+
+    def __init__(self, skills: dict, courses: dict, aliases: dict | None = None):
         self.skills = skills
         self.courses = courses
+        aliases = aliases if isinstance(aliases, dict) else {}
+        self._alias_ids: dict[str, list] = {}      # skill_key(Global name) -> ids, preferred first
+        self._display: dict[str, str] = {}         # id -> Global name
+        for name, ids in (aliases.get("names") or {}).items():
+            ids = [str(i) for i in ([ids] if isinstance(ids, (str, int)) else ids or [])]
+            key = skill_key(name)
+            if not key or not ids:
+                continue
+            merged = self._alias_ids.setdefault(key, [])
+            merged += [i for i in ids if i not in merged]
+            for i in ids:
+                self._display.setdefault(i, str(name))
+        self._unmodelled = {skill_key(n): str(i) for n, i in (aliases.get("unmodelled") or {}).items() if skill_key(n)}
+        self._unique_owner = {str(i): skill_key(o) for i, o in (aliases.get("unique_owner") or {}).items() if skill_key(o)}
+        self._upstream_keys: dict[str, list] | None = None
+        self._suggest_pool: list | None = None
 
     @classmethod
     def load(cls, data_dir: str | None = None) -> "Data":
@@ -129,27 +175,99 @@ class Data:
             skills = json.load(f)
         with open(d / "courses.json", encoding="utf-8") as f:
             courses = json.load(f)
-        return cls(skills, courses)
+        aliases = None
+        if (d / "skill_aliases.json").is_file():
+            try:
+                with open(d / "skill_aliases.json", encoding="utf-8") as f:
+                    aliases = json.load(f)
+            except (OSError, ValueError):
+                aliases = None   # a damaged alias file costs the Global names, not the simulator
+        return cls(skills, courses, aliases)
 
-    def resolve_skill(self, ref) -> str:
+    # ----- skills ---------------------------------------------------------------
+    def _upstream_index(self) -> dict:
+        if self._upstream_keys is None:
+            idx: dict[str, list] = {}
+            for sid, s in self.skills.items():
+                for text in (s["name"], s.get("name_jp", "")):
+                    k = skill_key(text)
+                    if k and sid not in idx.setdefault(k, []):
+                        idx[k].append(sid)
+            self._upstream_keys = idx
+        return self._upstream_keys
+
+    def _pick_by_owner(self, ids: list, owner) -> str:
+        """Several ids share one Global name: the character's own unique skill and the weaker inherited copy.
+        The owner gets the unique one; everyone else the inherited one."""
+        okey = skill_key(owner) if owner else ""
+        if okey:
+            for i in ids:
+                o = self._unique_owner.get(i)
+                if o and o in okey:
+                    return i
+        for i in ids:
+            if i not in self._unique_owner:
+                return i
+        return ids[0]
+
+    def resolve_skill(self, ref, owner=None) -> str:
+        """Skill id for an id, an in-game (Global) name, an upstream English name or a Japanese name.
+        `owner` is the veteran's name; it decides between a unique skill and its inherited copy."""
         ref = str(ref).strip()
         if ref in self.skills:
             return ref
+        key = skill_key(ref)
+        usable = [i for i in self._alias_ids.get(key, []) if i in self.skills]
+        if usable:
+            return self._pick_by_owner(usable, owner)
         low = ref.lower()
         hits = [sid for sid, s in self.skills.items() if s["name"].lower() == low or s.get("name_jp") == ref]
+        if not hits and key:
+            hits = self._upstream_index().get(key, [])
         if len(hits) == 1:
             return hits[0]
-        if not hits:
-            raise ValueError(f"Unknown skill '{ref}'. Try --find-skill \"{ref}\"")
-        raise ValueError(f"Skill name '{ref}' is ambiguous; use an id: {', '.join(sorted(hits))}")
+        if len(hits) > 1:
+            raise ValueError(f"Skill name '{ref}' is ambiguous; use an id: {', '.join(sorted(hits))}")
+        if key in self._unmodelled or key in self._alias_ids:
+            raise UnmodelledSkill(f"'{ref}' is a real skill but the simulator does not model its effect")
+        raise ValueError(f"Unknown skill '{ref}'. Try --find-skill \"{ref}\"")
 
     def find_skills(self, text: str, limit: int = 25) -> list:
-        low = text.lower()
-        out = [{"id": sid, "name": s["name"], "name_jp": s.get("name_jp", ""), "rarity": s["rarity"],
-                "partial": bool(s.get("partial"))}
-               for sid, s in self.skills.items()
-               if low in s["name"].lower() or text in s.get("name_jp", "")]
+        low, qkey = text.lower(), skill_key(text)
+        out = []
+        for sid, s in self.skills.items():
+            g = self._display.get(sid, "")
+            if (low in s["name"].lower() or text in s.get("name_jp", "")
+                    or (g and (low in g.lower() or (qkey and qkey in skill_key(g))))):
+                out.append({"id": sid, "name": s["name"], "name_jp": s.get("name_jp", ""), "rarity": s["rarity"],
+                            "partial": bool(s.get("partial")), "global": g})
         return sorted(out, key=lambda x: x["id"])[:limit]
+
+    def display_name(self, sid: str) -> str:
+        """The name the game shows when known, otherwise the upstream name."""
+        return self._display.get(sid) or self.skills[sid]["name"]
+
+    def suggest_skills(self, ref, limit: int = 3) -> list:
+        """Closest skills to a name that did not resolve, as 'id name' strings (any of the three name kinds)."""
+        key = skill_key(ref)
+        if not key:
+            return []
+        if self._suggest_pool is None:
+            pool: dict[str, list] = {}
+            for sid, s in self.skills.items():
+                label = f"{sid} {self._display.get(sid) or s['name']}"
+                for text in (s["name"], s.get("name_jp", ""), self._display.get(sid, "")):
+                    k = skill_key(text)
+                    if k:
+                        pool.setdefault(k, []).append((sid, label))
+            self._suggest_pool = pool
+        out, seen = [], set()
+        for k in difflib.get_close_matches(key, list(self._suggest_pool), n=limit * 3, cutoff=0.6):
+            for sid, label in self._suggest_pool[k]:
+                if sid not in seen:
+                    seen.add(sid)
+                    out.append(label)
+        return out[:limit]
 
     def list_courses(self, text: str = "") -> list:
         low = text.lower()
@@ -915,7 +1033,9 @@ def make_env_and_skills(data: Data, cfg: dict, spec: dict):
     compiled = []
     for ref in spec.get("skills", []):
         sid = data.resolve_skill(ref)
-        compiled.append(compile_skill(sid, data.skills[sid], env))
+        cs = compile_skill(sid, data.skills[sid], env)
+        cs.name = data.display_name(sid)
+        compiled.append(cs)
     return env, compiled
 
 

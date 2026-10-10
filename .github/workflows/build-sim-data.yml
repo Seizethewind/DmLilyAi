@@ -4,7 +4,10 @@ name: Build simulator data
 # (GPL-3.0) and writes slim versions for the Umamusume race simulator:
 #   tools/sim_data/skills.json
 #   tools/sim_data/courses.json
-# (tools/build_sim_data.py). The data lives outside LilyAiGameSpace so it is not
+# (tools/build_sim_data.py), then the in-game (Global) skill names -> ids from umamusu.wiki:
+#   tools/sim_data/skill_aliases.json (tools/build_skill_aliases.py)
+# The alias step may fail (red step, run stays green) if the wiki is unreachable or its layout changed; the old
+# alias file is then kept. The data lives outside LilyAiGameSpace so it is not
 # picked up by the docs indexer.
 #
 # How to use:
@@ -56,6 +59,16 @@ jobs:
           python -u tools/build_sim_data.py "${args[@]}" | tee build.log
           exit "${PIPESTATUS[0]}"
 
+      - name: Build skill aliases (Global names)
+        continue-on-error: true
+        run: |
+          args=()
+          if [ "$DRY_RUN" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          python -u tools/build_skill_aliases.py "${args[@]}" | tee aliases.log
+          exit "${PIPESTATUS[0]}"
+
       - name: Summary
         if: always()
         run: |
@@ -63,6 +76,10 @@ jobs:
             echo "### Simulator data build"
             echo '```'
             tail -n 40 build.log 2>/dev/null || echo "no log"
+            echo '```'
+            echo "### Skill aliases (Global names)"
+            echo '```'
+            tail -n 40 aliases.log 2>/dev/null || echo "no log"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -75,7 +92,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "Nothing to commit."
           else
-            git commit -m "chore: update simulator data (skills, courses)"
+            git commit -m "chore: update simulator data (skills, courses, skill aliases)"
             git pull --rebase origin "${GITHUB_REF_NAME}" || true
             git push
           fi
