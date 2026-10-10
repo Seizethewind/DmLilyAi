@@ -188,24 +188,28 @@ def load_data(data_dir: str | None = None):
         return None
 
 
-def resolve_skills(names: list, data) -> tuple[list, list]:
-    """Names (or ids) -> skill ids. Returns (ids, problems). Unknown names are reported with suggestions."""
+def resolve_skills(names: list, data, owner=None) -> tuple[list, list]:
+    """Names (or ids) -> skill ids. Returns (ids, problems).
+    Names may be the in-game (Global) name, the upstream English name, the Japanese name or an id; case, punctuation and
+    the circle mark's spelling do not matter. `owner` is the veteran's name: it picks the character's own unique skill
+    over its inherited copy. A name that does not resolve is reported with the closest matches, and a real skill the
+    simulator cannot model is reported as that, not as unknown."""
     ids, problems = [], []
     for ref in names:
-        tries = [ref, ref.replace("◯", "○").replace("〇", "○")]
-        found, err = None, None
-        for t in tries:
-            try:
-                found = data.resolve_skill(t)
-                break
-            except ValueError as exc:
-                err = str(exc)
-        if found is None:
-            word = re.split(r"[ ○◎◯]", ref)[0]
-            hints = [f"{h['id']} {h['name']}" for h in data.find_skills(word, limit=3)] if word else []
-            problems.append(f"skill '{ref}' not resolved ({err.split('.')[0] if err else 'unknown'})"
-                            + (f"; similar: {', '.join(hints)}" if hints else ""))
-        elif found not in ids:
+        try:
+            found = data.resolve_skill(ref, owner=owner)
+        except ValueError as exc:
+            if exc.__class__.__name__ == "UnmodelledSkill":
+                problems.append(f"skill '{ref}' is not simulated: its effect is not modelled (it acts on other runners "
+                                f"or on the start), so it is left out")
+                continue
+            hints = data.suggest_skills(ref, 3) if hasattr(data, "suggest_skills") else []
+            why = str(exc).split(". ")[0]
+            problems.append(f"skill '{ref}' name not recognised ({why})"
+                            + (f"; closest: {', '.join(hints)}" if hints else "")
+                            + "; look it up with sim_find_skill and use its id")
+            continue
+        if found not in ids:
             ids.append(found)
     return ids, problems
 
@@ -262,7 +266,7 @@ def to_build(veteran, course, style=None, add_skills=None, data=None, strict=Fal
 
     skills = list(vet["skills"]) + [s for s in (add_skills or [])]
     if data is not None:
-        ids, problems = resolve_skills(skills, data)
+        ids, problems = resolve_skills(skills, data, owner=vet["name"])
         if problems and strict:
             raise ValueError("; ".join(problems))
         warnings += problems

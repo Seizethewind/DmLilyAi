@@ -49,7 +49,7 @@ Saving rules:
 
 - Stats are whole numbers. Aptitudes are letters S to G, or `null` when they could not be read.
 - Skills are stored as **names**, exactly as read. They are turned into skill ids only when a build is made
-  (`VeteranReader.to_build`). A name that does not match `skills.json` is skipped with a warning.
+  (`VeteranReader.to_build`). Names may be the in-game (Global) name, the upstream English name, the Japanese name or a skill id; case, punctuation and the circle spelling (○ ◯ O) do not matter. The Global names come from `tools/sim_data/skill_aliases.json`. A name that matches nothing is skipped with a warning that lists the closest skills.
 
 ## Simulating a veteran
 
