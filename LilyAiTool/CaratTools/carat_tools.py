@@ -65,7 +65,19 @@ def carat_tools(store: CaratStore) -> list[ToolSpec]:
             spent = (spent or 0) + pulls * CARATS_PER_PULL
         reason = (args.get("reason") or "").strip() or None
         correction = bool(args.get("correction"))
+        category = (args.get("category") or "").strip().lower().replace(" ", "_") or None
         prev = store.last(uid)
+        if prev and balance != prev["balance"] and not (reason or pulls is not None or correction):
+            d = balance - prev["balance"]
+            verb = f"went UP by {d:,}" if d > 0 else f"went DOWN by {-d:,}"
+            return (f"NOT RECORDED. The balance {verb} (from {prev['balance']:,} to {balance:,}). Ask the user why before "
+                    "recording: " + ("where the carats came from (login bonus, missions, event or campaign reward, gift, "
+                                     "shop/purchase, or something else)" if d > 0 else
+                                     f"what happened (pulls, which is {-d / CARATS_PER_PULL:g} pulls if that is all of it, "
+                                     "another expense, or a wrong number to correct)") +
+                    ". Then call carat_update again with their answer as reason.")
+        if prev and balance < prev["balance"] and spent is None and reason and not correction:
+            spent = prev["balance"] - balance   # the user explained the whole drop
         try:
             e = classify(prev["balance"] if prev else None, balance, spent, correction)
         except CaratError as err:
@@ -74,7 +86,7 @@ def carat_tools(store: CaratStore) -> list[ToolSpec]:
             note = reason or "correction"
         else:
             note = reason
-        store.add(uid, balance, e["income"], e["spent"], e["kind"], note)
+        store.add(uid, balance, e["income"], e["spent"], e["kind"], note, category=category)
         if not prev:
             return (f"Recorded the starting balance: {balance:,} carats. No gain counted yet; from the next update on, the "
                     "difference is the income.")
@@ -84,7 +96,7 @@ def carat_tools(store: CaratStore) -> list[ToolSpec]:
         lines = [f"Balance {balance:,} (was {prev['balance']:,} {gap:.1f} days ago)."]
         if e["spent"]:
             lines.append(f"Spent {e['spent']:,} ({e['spent'] / CARATS_PER_PULL:g} pulls' worth)" + (f": {reason}." if reason else "."))
-        lines.append(f"Income since last entry: +{e['income']:,}" + (f" (about {e['income'] / gap:,.0f} per day)." if gap >= 0.04 else "."))
+        lines.append(f"Income since last entry: +{e['income']:,}" + (f" from {reason}" if reason and not e["spent"] else "") + (f" (about {e['income'] / gap:,.0f} per day)." if gap >= 0.04 else "."))
         if e["income"] >= BIG_JUMP:
             lines.append("That is a large gain for one stretch: confirm it with the user in case the number was mistyped "
                          "(then carat_undo and re-enter).")
@@ -97,8 +109,14 @@ def carat_tools(store: CaratStore) -> list[ToolSpec]:
             return "No carat balance recorded yet. Ask the user for their current carat amount and use carat_update."
         days = _int(args, "days") or 30
         recent = store.recent(uid, 5)
+        cats = store.by_category(uid)
         out = [f"Current balance: {last['balance']:,} carats (as of {_day(last['ts'])}, about {last['balance'] / CARATS_PER_PULL:.1f} pulls).",
-               _rate(store.window(uid, max(1, min(days, 365)))), "Latest entries:"]
+               _rate(store.window(uid, max(1, min(days, 365))))]
+        if cats:
+            out.append("By reason (all time): " + "; ".join(
+                f"{c['category'].replace('_', ' ')} " + (f"+{c['income']:,}" if c["income"] else "") +
+                (f" -{c['spent']:,}" if c["spent"] else "") for c in cats))
+        out.append("Latest entries:")
         for r in recent:
             extra = f" [{r['kind']}{': ' + r['note'] if r['note'] else ''}]" if r["kind"] != "gain" else ""
             out.append(f"- {_day(r['ts'])}: {r['balance']:,} (income +{r['income']:,}, spent {r['spent']:,}){extra}")
@@ -126,14 +144,17 @@ def carat_tools(store: CaratStore) -> list[ToolSpec]:
         ToolSpec(
             "carat_update",
             "Record the user's CURRENT in-game carat balance and work out the gain since their last entry (new minus last). "
-            "Call it whenever the user states their carat amount. If the result starts with NOT RECORDED, the balance "
-            "dropped: ask the user what happened (pulls, another expense, or a typo), then call again with the answer: "
-            "pulls=<number of pulls> or spent=<carats> plus reason, or correction=true if the earlier or new number was "
-            "wrong. Never invent the answer to that question yourself.",
+            "Call it whenever the user states their carat amount. EVERY change needs a reason, up or down. If the result "
+            "starts with NOT RECORDED, ask the user why it went up (login bonus, missions, event reward, gift, shop...) or "
+            "down (pulls, another expense, a typo), then call again with their answer as reason (and category), plus "
+            "pulls=<number> or spent=<carats> when they spent some, or correction=true if a number was wrong. If the user "
+            "already gave the reason in the same message (\"+1500 from login bonus\"), pass it straight away. Never "
+            "invent the answer yourself.",
             obj({"balance": {"type": ["integer", "string"], "description": "Current carats, e.g. 18500 or '18.5k'"},
                  "pulls": {"type": ["integer", "null"], "description": "Pulls done since the last entry (150 carats each)"},
                  "spent": {"type": ["integer", "null"], "description": "Other carats spent since the last entry"},
-                 "reason": {"type": ["string", "null"], "description": "What the user said happened, in a few words"},
+                 "reason": {"type": ["string", "null"], "description": "Why the balance changed, in the user's words, e.g. 'login bonus'"},
+                 "category": {"type": ["string", "null"], "description": "login_bonus, missions, event, gift, shop, pulls, purchase, correction or other"},
                  "correction": {"type": ["boolean", "null"], "description": "True if the number is a correction, not income or spending"}},
                 ["balance"]),
             carat_update, category=CATEGORY),

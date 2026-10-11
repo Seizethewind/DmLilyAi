@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS user_carat_log (
     income INTEGER NOT NULL DEFAULT 0,
     spent INTEGER NOT NULL DEFAULT 0,
     kind TEXT NOT NULL,
-    note TEXT
+    note TEXT,
+    category TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_carat_log_user ON user_carat_log(user_id, id);
 """
@@ -67,21 +68,26 @@ class CaratStore:
     def __init__(self, store: MemoryStore):
         self.db = store.db
         self.db.executescript(CARAT_SCHEMA)
+        try:   # a table made before categories existed
+            self.db.execute("ALTER TABLE user_carat_log ADD COLUMN category TEXT")
+        except Exception:
+            pass
 
     def last(self, user_id: str) -> dict[str, Any] | None:
         return self.db.query_one(
-            "SELECT id, ts, balance, income, spent, kind, note FROM user_carat_log WHERE user_id=? ORDER BY id DESC LIMIT 1",
+            "SELECT id, ts, balance, income, spent, kind, note, category FROM user_carat_log WHERE user_id=? ORDER BY id DESC LIMIT 1",
             (user_id,))
 
     def recent(self, user_id: str, limit: int = 10) -> list[dict[str, Any]]:
         return self.db.query(
-            "SELECT id, ts, balance, income, spent, kind, note FROM user_carat_log WHERE user_id=? ORDER BY id DESC LIMIT ?",
+            "SELECT id, ts, balance, income, spent, kind, note, category FROM user_carat_log WHERE user_id=? ORDER BY id DESC LIMIT ?",
             (user_id, int(limit)))
 
-    def add(self, user_id: str, balance: int, income: int, spent: int, kind: str, note: str | None, ts: float | None = None) -> int:
+    def add(self, user_id: str, balance: int, income: int, spent: int, kind: str, note: str | None, ts: float | None = None,
+            category: str | None = None) -> int:
         self.db.execute(
-            "INSERT INTO user_carat_log(user_id, ts, balance, income, spent, kind, note) VALUES (?,?,?,?,?,?,?)",
-            (user_id, ts if ts is not None else now_ts(), int(balance), int(income), int(spent), kind, note))
+            "INSERT INTO user_carat_log(user_id, ts, balance, income, spent, kind, note, category) VALUES (?,?,?,?,?,?,?,?)",
+            (user_id, ts if ts is not None else now_ts(), int(balance), int(income), int(spent), kind, note, category))
         self.db.execute(
             "DELETE FROM user_carat_log WHERE user_id=? AND id NOT IN ("
             "SELECT id FROM user_carat_log WHERE user_id=? ORDER BY id DESC LIMIT ?)", (user_id, user_id, MAX_ROWS))
@@ -121,6 +127,17 @@ class CaratStore:
             (user_id, start["id"]))
         span = max((last["ts"] - start["ts"]) / 86400, 1e-9)
         return {"days": span, "income": int(t["income"]), "spent": int(t["spent"]), "per_day": t["income"] / span}
+
+    def by_category(self, user_id: str, since_ts: float | None = None) -> list[dict[str, Any]]:
+        """Income and spending per reason category (rows the user explained), biggest first."""
+        q = ("SELECT COALESCE(category,'uncategorised') AS category, SUM(income) AS income, SUM(spent) AS spent, COUNT(*) AS n "
+             "FROM user_carat_log WHERE user_id=? AND kind!='baseline'")
+        args: list[Any] = [user_id]
+        if since_ts is not None:
+            q += " AND ts>?"
+            args.append(since_ts)
+        q += " GROUP BY COALESCE(category,'uncategorised') ORDER BY SUM(income)+SUM(spent) DESC"
+        return self.db.query(q, tuple(args))
 
     def clear(self, user_id: str) -> int:
         n = int(self.db.query_one("SELECT COUNT(*) AS n FROM user_carat_log WHERE user_id=?", (user_id,))["n"])

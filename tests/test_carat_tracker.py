@@ -46,9 +46,20 @@ class ToolTests(unittest.TestCase):
         out = self.t["carat_update"](self.ctx, {"balance": 18500, "pulls": 10, "reason": "banner pulls"})
         self.assertIn("Spent 1,500", out)
         self.assertEqual(self.store.last("u1")["balance"], 18500)
-        self.assertIn("+600", self.t["carat_update"](self.ctx, {"balance": 19100}))
+        out = self.t["carat_update"](self.ctx, {"balance": 19100})
+        self.assertTrue(out.startswith("NOT RECORDED") and "UP by 600" in out)
+        self.assertIn("+600", self.t["carat_update"](self.ctx, {"balance": 19100, "reason": "login bonus", "category": "login_bonus"}))
+        self.assertIn("login bonus", self.t["carat_status"](self.ctx, {}))
+        self.assertTrue(self.t["carat_update"](self.ctx, {"balance": 19100})  .startswith("Balance"))   # unchanged: no question
         self.assertIn("19,100", self.t["carat_status"](self.ctx, {}))
+        self.t["carat_undo"](self.ctx, {})   # the unchanged entry
+        self.t["carat_undo"](self.ctx, {})   # the login bonus entry
         self.assertIn("now 18,500", self.t["carat_undo"](self.ctx, {}))
+
+    def test_reasoned_drop_without_amount(self):
+        self.t["carat_update"](self.ctx, {"balance": 20000})
+        out = self.t["carat_update"](self.ctx, {"balance": 18500, "reason": "bought a pack"})
+        self.assertIn("Spent 1,500", out)
 
     def test_users_are_separate(self):
         self.t["carat_update"](self.ctx, {"balance": 100})
