@@ -53,8 +53,7 @@ class ToolTests(unittest.TestCase):
         self.assertTrue(self.t["carat_update"](self.ctx, {"balance": 19100})  .startswith("Balance"))   # unchanged: no question
         self.assertIn("19,100", self.t["carat_status"](self.ctx, {}))
         self.t["carat_undo"](self.ctx, {})   # the unchanged entry
-        self.t["carat_undo"](self.ctx, {})   # the login bonus entry
-        self.assertIn("now 18,500", self.t["carat_undo"](self.ctx, {}))
+        self.assertIn("now 18,500", self.t["carat_undo"](self.ctx, {}))   # the login bonus entry
 
     def test_reasoned_drop_without_amount(self):
         self.t["carat_update"](self.ctx, {"balance": 20000})
