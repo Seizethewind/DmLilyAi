@@ -11,6 +11,7 @@ from LilyAiMemory.SessionMemory.session_memory import SessionMemory
 from LilyAiMemory.Storage.store import MemoryStore
 from LilyAiMemory.TrainerLink.trainer_link import TrainerLinkStore
 from LilyAiMemory.UserMemory.user_memory import UserMemory
+from LilyAiMemory.Carat.carat_store import CaratStore
 from LilyAiMemory.Veteran.veteran_store import VeteranStore
 
 
@@ -27,6 +28,7 @@ class MemoryService:
         self.guide_cache = GuideCacheStore(self.store)
         self.collection = CollectionStore(self.store)
         self.veterans = VeteranStore(self.store)
+        self.carats = CaratStore(self.store)
 
     def relevant_user_facts(self, user_id: str, query: str, limit: int = 6) -> list[str]:
         """Most relevant facts for this message; falls back to the newest facts so basics aren't lost."""
@@ -45,4 +47,5 @@ class MemoryService:
         self.conversation.clear(user_id)
         self.collection.clear(user_id)
         self.veterans.clear(user_id)
+        self.carats.clear(user_id)
         self.session.end(user_id)

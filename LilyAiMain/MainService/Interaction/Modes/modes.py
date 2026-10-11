@@ -39,8 +39,8 @@ MODES: dict[str, Mode] = {
         frozenset({"web", "utility", "discord", "umapyoi", "vm"}),
     ),
     "manage": Mode(
-        "manage", "Manage Mode", "leaderboard, fan gain and the other uma.moe workflow",
-        frozenset({"umamoe", "utility", "discord"}),
+        "manage", "Manage Mode", "leaderboard, fan gain, uma.moe and your carat balance",
+        frozenset({"umamoe", "utility", "discord", "carats"}),
     ),
     "analyst": Mode(
         "analyst", "Analyst Mode", "answers from the game data docs (guides, skills, cards, tables, calculators)",
@@ -75,7 +75,7 @@ CURRENT_RE = re.compile(r"^\s*(?:what|which)\s+mode\s+(?:am\s+i\s+in|is\s+this)\
 
 # Words that suggest another mode would serve the message better (used for a one-time tip after a chat reply).
 _SIM_HINT = re.compile(r"\b(?:simulat\w*|veterans?|time\s+trial)\b", re.I)
-_MANAGE_HINT = re.compile(r"\b(?:fan\s*gain|leaderboard|quota|circle\s+(?:rank|standing)|uma\.?moe)\b", re.I)
+_MANAGE_HINT = re.compile(r"\b(?:fan\s*gain|leaderboard|quota|circle\s+(?:rank|standing)|uma\.?moe|carats?)\b", re.I)
 
 
 def mode_of(session) -> Mode:
@@ -94,7 +94,7 @@ def menu_text(current: Mode) -> str:
 
 _WELCOME = {
     "chat": "Back to everyday chat. I'll search the web when it helps.",
-    "manage": "Ask about fan gain, the leaderboard, circle standing, your Trainer ID or reminders.",
+    "manage": "Ask about fan gain, the leaderboard, circle standing, your Trainer ID or reminders. Tell me your carat amount (e.g. \"I have 20k carats\") and I'll track your income.",
     "analyst": "Ask about characters, skills, support cards, race lists or guides, or send a trainee screenshot for a review.",
     "simulator": ("Send screenshots of a veteran (the Umamusume Details screen, skills tab) to save it, then ask me to "
                   "simulate it on a course, e.g. \"simulate Oguri Cap on Tokyo 2400 turf\"."),
