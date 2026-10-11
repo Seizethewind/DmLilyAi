@@ -48,6 +48,7 @@ from LilyAiRag.service import RagService
 from LilyAiTask.DailyTask.DeficitTask.snapshot_job import run_daily_fan_gain
 from LilyAiTask.MonthlyTask.quota import get_quota
 from LilyAiTool.CollectionTools import collection_tools
+from LilyAiTool.CaratTools import carat_tools
 from LilyAiTool.ManageTools import fan_analytics_tools
 from LilyAiTool.SimulatorTools import simulator_tools
 from LilyAiTool.service import ToolContextData, ToolService, ToolSpec
@@ -472,6 +473,9 @@ def build_app(
     # Simulator Mode: the user's saved veterans + the race simulator. Empty (nothing registered) if the simulator's
     # data files are missing.
     for spec in simulator_tools(memory.veterans):
+        tools.register(spec)
+    # Manage Mode: carat balance tracker (income = difference between balances, drops are audited).
+    for spec in carat_tools(memory.carats):
         tools.register(spec)
 
     umamoe = UmamoeClient(settings.umamoe_api_key) if settings.umamoe_api_key else None
