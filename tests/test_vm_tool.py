@@ -142,7 +142,7 @@ def test_hourly_cap_on_code_runs(vm, monkeypatch):
     monkeypatch.setenv("LILYAI_VM_MAX_RUNS_PER_HOUR", "2")
     factory = lambda template, ttl, key: _FakeSandbox()      # noqa: E731
     vm.run_code("python", "print(1)", sandbox_factory=factory)
-    vm.run_code("python", "print(3)", sandbox_factory=factory)
+    vm.run_code("python", "print(2)", sandbox_factory=factory)
     with pytest.raises(vm.SandboxError, match="limit reached"):
         vm.run_code("python", "print(3)", sandbox_factory=factory)
 
