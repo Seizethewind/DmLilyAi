@@ -92,46 +92,24 @@ def load_settings() -> Settings:
         history_turns=int(os.getenv("HISTORY_TURNS", "12")),
         token_budget=int(os.getenv("TOKEN_BUDGET", "6000")),
         web_enabled=_bool("WEB_ENABLED", True),
-        learn_from_chats=_bool("LEARN_FROM_CHATS", True),
-        frontend_dir=os.getenv("FRONTEND_DIR", ""),
+        learn_from_chats=_bool("LEARN_FROM_CHATS", False),
         model_scan_enabled=_bool("MODEL_SCAN_ENABLED", True),
         model_scan_interval_hours=float(os.getenv("MODEL_SCAN_INTERVAL_HOURS", "24")),
         model_scan_interval_s=float(scan_seconds_raw) if scan_seconds_raw else None,
         model_scan_max_auto=int(os.getenv("MODEL_SCAN_MAX_AUTO", "6")),
         model_scan_docs_dir=Path(os.getenv("MODEL_SCAN_DOCS_DIR", str(Path(__file__).resolve().parents[2] / "LilyAiGroqSupport"))),
+        frontend_dir=os.getenv("FRONTEND_DIR", ""),
         webhook_url=os.getenv("WEBHOOK_URL", ""),
-        # Tavily (LLM-oriented web search API) - preferred web_search/read_webpage provider when
-        # set; falls back to the keyless DuckDuckGo HTML scraper otherwise. One key, or several
-        # comma-separated (e.g. tvly_a,tvly_b) - rotated evenly and auto-switches on rate limits,
-        # same as GROQ_API_KEY. See LilyAiCore/ExternalServices/Search/tavily.py and
-        # bootstrap.py's build_app().
         tavily_api_keys=tuple(k.strip() for k in os.getenv("TAVILY_API_KEY", "").split(",") if k.strip()),
-        # uma.moe (Umamusume circle/fan tracking) - see LilyAiCore/ExternalServices/Umamoe/
         umamoe_api_key=os.getenv("UMAMOE_API_KEY", ""),
         umamoe_circle_ids=tuple(int(x) for x in os.getenv("UMAMOE_CIRCLE_IDS", "").split(",") if x.strip().isdigit()),
-        # Discord user id to DM when a tracked circle's rank/points/fans change. Empty = log only.
         umamoe_notify_user_id=os.getenv("UMAMOE_NOTIFY_USER_ID", ""),
         umamoe_poll_interval_hours=float(os.getenv("UMAMOE_POLL_INTERVAL_HOURS", "6")),
-        # Sub-hour override (e.g. 300 = every 5 minutes). Takes precedence over
-        # UMAMOE_POLL_INTERVAL_HOURS when set. A 60s floor is enforced in bootstrap.py.
         umamoe_poll_interval_s=float(umamoe_seconds_raw) if umamoe_seconds_raw else None,
-        # umapyoi.net (Uma Musume game data: gacha banners, news, character info/birthdays) -
-        # keyless, no config needed beyond this toggle. Supplementary/flavor tools only - see
-        # LilyAiCore/ExternalServices/Umapyoi/ and bootstrap.py's build_app(); check_umamoe /
-        # check_fan_gain and web_search remain the bot's primary tools.
         umapyoi_enabled=_bool("UMAPYOI_ENABLED", True),
-        # Turso (libSQL) - optional. When TURSO_DATABASE_URL is set, bootstrap.py uses
-        # TursoDatabase (embedded replica) instead of local sqlite. See
-        # LilyAiCore/ExternalServices/Database/turso.py.
         turso_database_url=os.getenv("TURSO_DATABASE_URL", ""),
         turso_auth_token=os.getenv("TURSO_AUTH_TOKEN", ""),
         turso_sync_interval_s=float(os.getenv("TURSO_SYNC_INTERVAL_SECONDS", "60")),
-        # Self-ping (optional, on by default) - keeps a free-tier host (e.g. Render's free
-        # plan) from sleeping the service after ~15 min of no inbound traffic, by hitting
-        # its own /api/health on a schedule. Render auto-sets RENDER_EXTERNAL_URL, so this
-        # needs no config there; SELF_PING_URL overrides it (e.g. for other hosts), and
-        # SELF_PING_ENABLED=false turns it off entirely. See
-        # LilyAiMain/MainService/Interaction/Workflows/self_ping_job.py.
         self_ping_enabled=_bool("SELF_PING_ENABLED", True),
         self_ping_url=os.getenv("SELF_PING_URL", os.getenv("RENDER_EXTERNAL_URL", "")),
         self_ping_interval_s=float(os.getenv("SELF_PING_INTERVAL_SECONDS", "300")),
