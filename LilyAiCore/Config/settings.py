@@ -14,6 +14,16 @@ def _bool(name: str, default: bool) -> bool:
     return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _environment() -> str:
+    return os.getenv("LILYAI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")).strip().lower()
+
+
+def validate_security_settings(*, enable_api: bool, admin_token: str, environment: str) -> None:
+    """Fail closed for an internet-facing production API without authentication."""
+    if enable_api and environment in {"production", "prod"} and not admin_token:
+        raise RuntimeError("ADMIN_TOKEN is required when ENABLE_API is enabled in production")
+
+
 @dataclass(frozen=True)
 class Settings:
     discord_token: str
@@ -54,6 +64,7 @@ class Settings:
     self_ping_enabled: bool
     self_ping_url: str
     self_ping_interval_s: float
+    environment: str = "development"
 
     @property
     def db_path(self) -> Path:
@@ -74,6 +85,10 @@ def load_settings() -> Settings:
     allowed = frozenset(int(x) for x in os.getenv("ALLOWED_USER_IDS", "").split(",") if x.strip().isdigit())
     scan_seconds_raw = os.getenv("MODEL_SCAN_INTERVAL_SECONDS", "").strip()
     umamoe_seconds_raw = os.getenv("UMAMOE_POLL_INTERVAL_SECONDS", "").strip()
+    environment = _environment()
+    enable_api = _bool("ENABLE_API", True)
+    admin_token = os.getenv("ADMIN_TOKEN", "")
+    validate_security_settings(enable_api=enable_api, admin_token=admin_token, environment=environment)
     return Settings(
         discord_token=os.getenv("DISCORD_TOKEN", ""),
         groq_api_keys=tuple(k.strip() for k in os.getenv("GROQ_API_KEY", "").split(",") if k.strip()),
@@ -83,10 +98,10 @@ def load_settings() -> Settings:
         data_dir=data_dir,
         log_level=os.getenv("LOG_LEVEL", "INFO"),
         enable_discord=_bool("ENABLE_DISCORD", True),
-        enable_api=_bool("ENABLE_API", True),
+        enable_api=enable_api,
         api_host=os.getenv("API_HOST", "0.0.0.0"),
         api_port=int(os.getenv("PORT", os.getenv("API_PORT", "8000"))),
-        admin_token=os.getenv("ADMIN_TOKEN", ""),
+        admin_token=admin_token,
         cors_origins=tuple(o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()),
         allowed_user_ids=allowed,
         history_turns=int(os.getenv("HISTORY_TURNS", "12")),
@@ -113,4 +128,5 @@ def load_settings() -> Settings:
         self_ping_enabled=_bool("SELF_PING_ENABLED", True),
         self_ping_url=os.getenv("SELF_PING_URL", os.getenv("RENDER_EXTERNAL_URL", "")),
         self_ping_interval_s=float(os.getenv("SELF_PING_INTERVAL_SECONDS", "300")),
+        environment=environment,
     )
