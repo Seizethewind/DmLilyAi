@@ -4,7 +4,7 @@ The code runs in a PandaStack microVM (LilyAiGameSpace/vm_runner.py), never insi
 sandbox_runner local fallback. The tool is only offered when ALL of these hold:
 
     - a PandaStack key is set and the pandastack package is installed,
-    - LILYAI_VM_TOOL is not switched off (default on),
+    - LILYAI_VM_TOOL is explicitly switched on (default off; set LILYAI_VM_TOOL=1 to enable),
     - at least one Discord user id is allowed: LILYAI_VM_USER_IDS, or if that is empty, ALLOWED_USER_IDS.
 
 The handler checks the user id again on every call, so a model can't run code for someone who isn't on the list.
@@ -41,7 +41,7 @@ def allowed_user_ids() -> frozenset[str]:
 
 
 def switch_on() -> bool:
-    return os.getenv("LILYAI_VM_TOOL", "1").strip().lower() not in ("0", "false", "no", "off")
+    return os.getenv("LILYAI_VM_TOOL", "0").strip().lower() not in ("0", "false", "no", "off")
 
 
 def enabled() -> bool:

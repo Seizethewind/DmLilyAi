@@ -178,8 +178,14 @@ def tool(vm, monkeypatch):
     monkeypatch.setattr(sandbox_runner, "sdk_installed", lambda: True)
     monkeypatch.setenv("LILYAI_VM_USER_IDS", "42")
     monkeypatch.delenv("ALLOWED_USER_IDS", raising=False)
-    monkeypatch.delenv("LILYAI_VM_TOOL", raising=False)
+    monkeypatch.setenv("LILYAI_VM_TOOL", "1")
     return importlib.import_module("LilyAiTool.VmTools.vm_tools")
+
+
+def test_hidden_when_switch_is_unset(tool, monkeypatch):
+    monkeypatch.delenv("LILYAI_VM_TOOL", raising=False)
+    assert tool.switch_on() is False
+    assert tool.vm_tools() == []
 
 
 def test_offered_when_configured_switched_on_and_someone_is_allowed(tool):
