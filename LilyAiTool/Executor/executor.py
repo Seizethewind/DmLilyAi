@@ -21,6 +21,8 @@ class ToolExecutor:
         start = time.perf_counter()
         try:
             spec = self.registry.get(name)
+            if not ctx.can_use_tool(spec.category):
+                raise ToolError(f"Tool {name!r} is not authorized for this request.")
             args = validate_args(spec.parameters, arguments)
             result = spec.handler(ctx, args)
             if inspect.isawaitable(result):
@@ -30,7 +32,7 @@ class ToolExecutor:
             out, ok = "Tool timed out.", False
         except ToolError as e:
             out, ok = f"Tool error: {e}", False
-        except Exception as e:  # tools must never crash the chat loop
+        except Exception:
             log.exception("tool %s crashed", name)
-            out, ok = f"Tool crashed: {type(e).__name__}: {e}", False
+            out, ok = "Tool failed safely. Please try again later.", False
         return ToolResult(name, ok, truncate(out, MAX_OUTPUT_CHARS), (time.perf_counter() - start) * 1000)
