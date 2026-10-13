@@ -43,7 +43,8 @@ NUMBER_SAMPLES = [
 # ---- the three copies of the number rules must agree
 def test_number_rules_agree_everywhere():
     pytest.importorskip("LilyAiCore.Logging.logger")
-    from LilyAiGameSpace import guide_builder, number_check
+    from LilyAiMain.MainService.Interaction.Workflows import guide_builder
+    from LilyAiCore.Helpers import number_check
 
     for text in NUMBER_SAMPLES:
         assert go.numbers_in(text) == number_check.numbers_in(text) == guide_builder.numbers_in(text)
@@ -51,7 +52,7 @@ def test_number_rules_agree_everywhere():
 
 def test_verify_agrees_with_the_guide_builder():
     pytest.importorskip("LilyAiCore.Logging.logger")
-    from LilyAiGameSpace import guide_builder as gb
+    from LilyAiMain.MainService.Interaction.Workflows import guide_builder as gb
 
     passage = gb.Passage("S1", "d1", "Special Week", "Overview", "Speed growth is 20% and it costs 1,200 points. Stamina is 15%.")
     draft = "- Growth is 20% [S1]. Costs 999 points [S1] [S9]\n- Stamina is 15% [S1]\n- Wild claim of 777 [S1]"
@@ -119,7 +120,7 @@ def test_unknown_op_is_an_error():
 @pytest.fixture()
 def gb(monkeypatch):
     pytest.importorskip("LilyAiCore.Logging.logger")
-    from LilyAiGameSpace import guide_builder
+    from LilyAiMain.MainService.Interaction.Workflows import guide_builder
     from LilyAiTool.Sandbox import sandbox_runner
 
     monkeypatch.setenv("PANDASTACK_API_KEY", "")

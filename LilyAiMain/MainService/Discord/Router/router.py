@@ -3,7 +3,6 @@ import re
 import time
 
 from LilyAiCore.Logging.logger import get_logger
-from LilyAiGameSpace.guide_builder import GuideBuilder, GuidePlan
 from LilyAiLearning.MemoryLearning.memory_learning import explicit_memory_request
 from LilyAiMain.MainService.Discord.Events.bus import EventBus
 from LilyAiMain.MainService.Discord.Middleware.middleware import MAX_INPUT_CHARS, AccessControl, RateLimiter, clean_input
@@ -19,6 +18,7 @@ from LilyAiMain.MainService.Interaction.Onboarding.onboarding import OnboardingF
 from LilyAiMain.MainService.Interaction.Polls.polls import PollManager
 from LilyAiMain.MainService.Interaction.Workflows.career_review import CareerReview
 from LilyAiMain.MainService.Interaction.Workflows.chat_workflow import ChatRequest, ChatWorkflow
+from LilyAiMain.MainService.Interaction.Workflows.guide_builder import GuideBuilder, GuidePlan
 from LilyAiMain.MainService.Interaction.Workflows.veteran_intake import VeteranIntakeFlow
 from LilyAiMemory.service import MemoryService
 

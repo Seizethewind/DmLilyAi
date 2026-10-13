@@ -9,9 +9,9 @@ from LilyAiContext.service import ContextBuilder, ContextInput, HistoryMessage
 from LilyAiCore.Config.settings import Settings
 from LilyAiCore.Constants.constants import MAX_TOOL_ROUNDS
 from LilyAiCore.Exceptions.errors import ProviderError
+from LilyAiCore.Helpers import number_check
 from LilyAiCore.Logging.logger import get_logger
 from LilyAiCore.Providers.base import LLMProvider
-from LilyAiGameSpace import number_check
 from LilyAiLearning.service import LearningService, extract_facts, name_from_message
 from LilyAiMain.MainService.Interaction.Modes import MODES, prompt_note
 from LilyAiMemory.service import MemoryService
