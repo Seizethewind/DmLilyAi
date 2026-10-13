@@ -15,8 +15,8 @@ sys.path.insert(0, str(ROOT))
 
 from LilyAiGameSpace.Umamusume import Taxonomy as T  # noqa: E402
 from LilyAiGameSpace.Umamusume.Simulation import Simulator as S  # noqa: E402
-from LilyAiGameSpace import UmamusumeCatalog as C  # noqa: E402
-from LilyAiGameSpace import UmamusumeSkills as K  # noqa: E402
+from LilyAiGameSpace.Umamusume import UmamusumeCatalog as C  # noqa: E402
+from LilyAiGameSpace.Umamusume import UmamusumeSkills as K  # noqa: E402
 
 TAXONOMY_PY = ROOT / "LilyAiGameSpace" / "Umamusume" / "Taxonomy.py"
 TAXONOMY_MD = ROOT / "LilyAiGameSpace" / "Umamusume" / "Taxonomy" / "Taxonomy.md"
@@ -280,7 +280,7 @@ class DocTests(unittest.TestCase):
 
     def test_doc_is_found_by_the_docs_engine(self):
         try:
-            from LilyAiGameSpace.UmamusumeGameSpaceEngine import UmamusumeGameSpaceEngine
+            from LilyAiGameSpace.Umamusume.UmamusumeGameSpaceEngine import UmamusumeGameSpaceEngine
         except ImportError:
             self.skipTest("docs engine not importable here")
         engine = UmamusumeGameSpaceEngine(refresh_interval=0)
