@@ -26,7 +26,7 @@ from LilyAiCore.Exceptions.errors import ProviderError  # noqa: E402
 from LilyAiCore.ExternalServices.Database.sqlite import Database  # noqa: E402
 from LilyAiCore.Providers.base import LLMProvider, LLMResponse  # noqa: E402
 from LilyAiGameSpace.guide_builder import GuideBuilder, Passage, numbers_in, verify_section  # noqa: E402
-from LilyAiGameSpace.UmamusumeGameSpaceEngine import UmamusumeGameSpaceEngine  # noqa: E402
+from LilyAiGameSpace.Umamusume.UmamusumeGameSpaceEngine import UmamusumeGameSpaceEngine  # noqa: E402
 from LilyAiMain.MainService.bootstrap import build_app  # noqa: E402
 from LilyAiMain.MainService.Interaction.messages import IncomingMessage  # noqa: E402
 from LilyAiMemory.GuideCache.guide_cache import GuideCacheStore, is_cacheable  # noqa: E402

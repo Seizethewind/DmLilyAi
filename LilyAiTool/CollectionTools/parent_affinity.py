@@ -13,8 +13,9 @@ import json
 from typing import Any
 
 from LilyAiCore.Exceptions.errors import ToolError
-from LilyAiGameSpace import UmamusumeCatalog as cat
-from LilyAiGameSpace import affinity_data, sandbox_runner
+from LilyAiGameSpace.Umamusume import UmamusumeCatalog as cat
+from LilyAiGameSpace import sandbox_runner
+from LilyAiGameSpace.Umamusume.Affinity import affinity_data
 from LilyAiTool.Models.tool_models import ToolContextData, ToolSpec
 
 from .parent_ranking import rank_parents

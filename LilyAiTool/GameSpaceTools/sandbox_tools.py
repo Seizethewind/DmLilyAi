@@ -12,7 +12,8 @@ from __future__ import annotations
 import json
 
 from LilyAiCore.Exceptions.errors import ToolError
-from LilyAiGameSpace import affinity_data, sandbox_runner
+from LilyAiGameSpace import sandbox_runner
+from LilyAiGameSpace.Umamusume.Affinity import affinity_data
 from LilyAiTool.Models.tool_models import ToolSpec
 
 CATEGORY = "gamespace"

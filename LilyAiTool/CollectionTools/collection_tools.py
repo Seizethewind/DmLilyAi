@@ -14,7 +14,7 @@ from typing import Any, Callable
 
 from LilyAiCore.Exceptions.errors import ToolError
 from LilyAiCore.Helpers.clock import now_ts
-from LilyAiGameSpace import UmamusumeCatalog as cat
+from LilyAiGameSpace.Umamusume import UmamusumeCatalog as cat
 from LilyAiTool.Models.tool_models import ToolContextData, ToolSpec
 
 from .parent_ranking import parent_line, rank_parents

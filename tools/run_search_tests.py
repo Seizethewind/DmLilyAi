@@ -2,7 +2,7 @@
 """Run the Guide search tests against the Umamusume docs engine.
 
 Reads the question table in tools/docs_optimization/SearchTests.md and, for each question,
-asks the real engine (LilyAiGameSpace/UmamusumeGameSpaceEngine.py) in three ways:
+asks the real engine (LilyAiGameSpace/Umamusume/UmamusumeGameSpaceEngine.py) in three ways:
 
     search     engine.search(question)                              top 5 hits, all docs
     scoped     engine.search(question, category=<expected folder>)  top 5 hits, expected top folder only
@@ -43,7 +43,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-from LilyAiGameSpace.UmamusumeGameSpaceEngine import UmamusumeGameSpaceEngine  # noqa: E402
+from LilyAiGameSpace.Umamusume.UmamusumeGameSpaceEngine import UmamusumeGameSpaceEngine  # noqa: E402
 
 TESTS_FILE = REPO_ROOT / "tools" / "docs_optimization" / "SearchTests.md"
 MODES = ("search", "scoped", "context")

@@ -2,7 +2,7 @@
 inheritance parents.
 
 Only ownership and state live here. Card effects, trainee stats and skill conditions stay in the docs
-(LilyAiGameSpace), referenced by stable ids from LilyAiGameSpace/UmamusumeCatalog.py, so a game patch
+(LilyAiGameSpace), referenced by stable ids from LilyAiGameSpace/Umamusume/UmamusumeCatalog.py, so a game patch
 never leaves stored data out of date. Every row is keyed by Discord user id.
 """
 import json

@@ -17,7 +17,7 @@ import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
-DOCS_ROOT = Path(__file__).resolve().parent / "Umamusume"
+DOCS_ROOT = Path(__file__).resolve().parent
 CARD_DIR = "Support Cards"
 RARITIES = ("SSR", "SR", "R")
 TYPE_ORDER = ("Speed", "Stamina", "Power", "Guts", "Wit", "Friend", "Group")

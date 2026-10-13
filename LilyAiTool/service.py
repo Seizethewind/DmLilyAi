@@ -1,6 +1,6 @@
 from LilyAiCore.ExternalServices.Discord.notifier import NotifierBox
 from LilyAiCore.Logging.logger import get_logger
-from LilyAiGameSpace.UmamusumeGameSpaceEngine import get_engine
+from LilyAiGameSpace.Umamusume.UmamusumeGameSpaceEngine import get_engine
 from LilyAiTool.DiscordTools import discord_tools
 from LilyAiTool.Executor import ToolExecutor
 from LilyAiTool.GameSpaceTools import game_space_tools
