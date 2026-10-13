@@ -40,7 +40,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from LilyAiCore.Logging.logger import get_logger
-from LilyAiGameSpace.UmamusumeGameSpaceEngine import UmamusumeGameSpaceEngine, get_engine
+from LilyAiGameSpace.Umamusume.UmamusumeGameSpaceEngine import UmamusumeGameSpaceEngine, get_engine
 
 log = get_logger("gamespace.sandbox")
 

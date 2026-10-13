@@ -15,7 +15,7 @@ op "verify" Drop every sentence of a drafted section whose numbers are not in th
     in : {"op":"verify","sections":[{"text","tags":["S1","C1"],"allowed":["passage text", ...]}]}
     out: {"sections":[{"text","dropped"}]}
 
-KEEP numbers_in / verify_section IN STEP with LilyAiGameSpace/number_check.py and guide_builder.verify_section:
+KEEP numbers_in / verify_section IN STEP with LilyAiCore/Helpers/number_check.py and guide_builder.verify_section:
 tests/test_guide_ops.py checks that they agree.
 """
 from __future__ import annotations

@@ -10,7 +10,7 @@ larger than the smallest of the three pair ratings.
 
 Where the file is looked for, in order:
     1. $AFFINITY_DATA_PATH
-    2. LilyAiGameSpace/affinity_data/affinity.json   (commit it to the repo: simplest and works offline)
+    2. LilyAiGameSpace/Umamusume/Affinity/affinity.json   (commit it to the repo: simplest and works offline)
     3. $LILYAI_DATA_DIR/affinity.json                (a downloaded copy)
     4. download https://uma.moe/resources/current/affinity.json.gz into $LILYAI_DATA_DIR (needs outbound access;
        uma.moe may refuse scripts, in which case do 2)
@@ -30,7 +30,7 @@ from LilyAiCore.Logging.logger import get_logger
 
 log = get_logger("gamespace.affinity")
 
-PKG_DIR = Path(__file__).resolve().parent / "affinity_data"
+PKG_DIR = Path(__file__).resolve().parent
 DATA_URL = "https://uma.moe/resources/current/affinity.json.gz"
 NAMES_FILE = "affinity_names.json"
 
@@ -147,7 +147,7 @@ def _download(dest: Path) -> None:
         data = _parse(resp.content)
     except Exception as e:
         log.warning("affinity download failed: %s: %s", type(e).__name__, str(e)[:200])
-        raise AffinityError("The affinity data isn't installed and couldn't be downloaded. Add affinity.json to LilyAiGameSpace/affinity_data/ in the repo.")
+        raise AffinityError("The affinity data isn't installed and couldn't be downloaded. Add affinity.json to LilyAiGameSpace/Umamusume/Affinity/ in the repo.")
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(data, separators=(",", ":")), encoding="utf-8")
     log.info("downloaded affinity data to %s", dest)

@@ -47,7 +47,7 @@ class _RateLimited(Exception):
 @pytest.fixture()
 def vm(monkeypatch):
     pytest.importorskip("LilyAiCore.Logging.logger")
-    from LilyAiGameSpace import sandbox_runner, vm_runner
+    from LilyAiTool.Sandbox import sandbox_runner, vm_runner
 
     monkeypatch.setenv("PANDASTACK_API_KEY", "")
     monkeypatch.delenv("LILYAI_VM_MAX_RUNS_PER_HOUR", raising=False)
@@ -89,7 +89,7 @@ def test_a_failing_script_returns_its_error_instead_of_raising(vm):
 
 
 def test_no_key_never_runs_locally(vm, monkeypatch):
-    from LilyAiGameSpace import sandbox_runner
+    from LilyAiTool.Sandbox import sandbox_runner
 
     def boom(*a, **k):
         raise AssertionError("model-written code must never run in the bot")
@@ -172,7 +172,7 @@ def test_an_unreachable_service_is_a_plain_error(vm):
 # ---- the tool the chat model sees ----
 @pytest.fixture()
 def tool(vm, monkeypatch):
-    from LilyAiGameSpace import sandbox_runner
+    from LilyAiTool.Sandbox import sandbox_runner
 
     monkeypatch.setenv("PANDASTACK_API_KEY", "psk_test")
     monkeypatch.setattr(sandbox_runner, "sdk_installed", lambda: True)

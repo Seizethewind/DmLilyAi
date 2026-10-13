@@ -30,13 +30,13 @@ from typing import Any, Protocol
 
 from LilyAiCore.Exceptions.errors import ProviderError, RateLimitError
 from LilyAiCore.Helpers.clock import now_ts
+from LilyAiCore.Helpers.number_check import BULLET as _BULLET
+from LilyAiCore.Helpers.number_check import TAG as _TAG
+from LilyAiCore.Helpers.number_check import numbers_in
 from LilyAiCore.Logging.logger import get_logger
 from LilyAiCore.Providers.base import LLMProvider
-from LilyAiGameSpace import sandbox_runner
-from LilyAiGameSpace.number_check import BULLET as _BULLET
-from LilyAiGameSpace.number_check import TAG as _TAG
-from LilyAiGameSpace.number_check import numbers_in
-from LilyAiGameSpace.UmamusumeGameSpaceEngine import Doc, UmamusumeGameSpaceEngine, get_engine
+from LilyAiGameSpace.Umamusume.UmamusumeGameSpaceEngine import Doc, UmamusumeGameSpaceEngine, get_engine
+from LilyAiTool.Sandbox import sandbox_runner
 
 log = get_logger("gamespace.guide")
 

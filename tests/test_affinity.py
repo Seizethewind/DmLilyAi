@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("affinity_calc", ROOT / "LilyAiGameSpace" / "sandbox_scripts" / "affinity_calc.py")
+spec = importlib.util.spec_from_file_location("affinity_calc", ROOT / "LilyAiTool" / "Sandbox" / "sandbox_scripts" / "affinity_calc.py")
 ac = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ac)
 
@@ -64,7 +64,7 @@ def test_best_is_a_true_maximum():
 
 
 def real_file():
-    path = ROOT / "LilyAiGameSpace" / "affinity_data" / "affinity.json"
+    path = ROOT / "LilyAiGameSpace" / "Umamusume" / "Affinity" / "affinity.json"
     if not path.is_file():
         pytest.skip("affinity.json is not in the repo yet")
     return json.loads(path.read_text(encoding="utf-8"))
@@ -85,5 +85,5 @@ def test_real_file_layout():
 
 def test_names_cover_the_real_file():
     raw = real_file()
-    names = json.loads((ROOT / "LilyAiGameSpace" / "affinity_data" / "affinity_names.json").read_text(encoding="utf-8"))
+    names = json.loads((ROOT / "LilyAiGameSpace" / "Umamusume" / "Affinity" / "affinity_names.json").read_text(encoding="utf-8"))
     assert {str(c) for c in raw["chars"]} == set(names)

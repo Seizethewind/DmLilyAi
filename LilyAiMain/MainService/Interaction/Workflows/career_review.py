@@ -16,8 +16,8 @@ from LilyAiCore.Exceptions.errors import ProviderError
 from LilyAiCore.Logging.logger import get_logger
 from LilyAiCore.Providers.base import LLMProvider
 from LilyAiCore.Providers.offline import OfflineProvider
-from LilyAiGameSpace.CareerEvaluator import DEFAULT_CAP, evaluate, parse_goal, render_report
-from LilyAiGameSpace.TraineeSheet import Sheet, extract_json, merge_sheets, sheet_from_extraction
+from LilyAiGameSpace.Umamusume.CareerEvaluator import DEFAULT_CAP, evaluate, parse_goal, render_report
+from LilyAiGameSpace.Umamusume.TraineeSheet import Sheet, extract_json, merge_sheets, sheet_from_extraction
 from LilyAiMain.MainService.Interaction.messages import ImageAttachment, OutgoingMessage
 
 log = get_logger("career_review")

@@ -10,7 +10,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-SKILL_FILE = Path(__file__).resolve().parent / "Umamusume" / "Skill" / "skill.md"
+SKILL_FILE = Path(__file__).resolve().parent / "Skill" / "skill.md"
 
 # The "(Long)" / "(Front Runner)" / "(Dirt)" suffix on an effect line says where the skill works at all.
 _SCOPE_WORDS = {

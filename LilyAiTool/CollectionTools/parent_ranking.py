@@ -7,7 +7,7 @@ here. They need the Skill docs and the in-game compatibility rating, so the mode
 """
 from typing import Callable
 
-from LilyAiGameSpace.UmamusumeCatalog import SCENARIO_SPIRIT
+from LilyAiGameSpace.Umamusume.UmamusumeCatalog import SCENARIO_SPIRIT
 
 _PINK_POINTS = (("distance", 3.0), ("track", 2.0), ("style", 1.0))
 

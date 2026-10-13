@@ -1,7 +1,7 @@
 """Groq tools that give LilyAi read access to the Umamusume docs (LilyAiGameSpace)."""
 
 from LilyAiCore.Exceptions.errors import ToolError
-from LilyAiGameSpace.UmamusumeGameSpaceEngine import get_engine
+from LilyAiGameSpace.Umamusume.UmamusumeGameSpaceEngine import get_engine
 from LilyAiTool.Models.tool_models import ToolSpec
 
 CATEGORY = "gamespace"

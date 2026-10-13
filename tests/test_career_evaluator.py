@@ -7,14 +7,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from LilyAiGameSpace.CareerEvaluator import (
+from LilyAiGameSpace.Umamusume.CareerEvaluator import (
     Goal, base_stat, evaluate, guts_adjustment, parse_goal, render_report, required_stamina, rushed_pct,
     skill_activation_pct, COURSES,
 )
-from LilyAiGameSpace.TraineeSheet import (
+from LilyAiGameSpace.Umamusume.TraineeSheet import (
     Sheet, extract_json, merge_sheets, sheet_from_extraction,
 )
-from LilyAiGameSpace.UmamusumeSkills import SkillCatalog, skill_key, split_mark
+from LilyAiGameSpace.Umamusume.UmamusumeSkills import SkillCatalog, skill_key, split_mark
 
 MINI_SKILLS = """
 ## Unique Skills

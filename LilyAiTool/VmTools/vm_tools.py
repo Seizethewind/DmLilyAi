@@ -1,6 +1,6 @@
 """Groq tool: run code the model writes in a throwaway Linux VM. Optional, and only in Chat Mode.
 
-The code runs in a PandaStack microVM (LilyAiGameSpace/vm_runner.py), never inside the bot, and never through the
+The code runs in a PandaStack microVM (LilyAiTool/Sandbox/vm_runner.py), never inside the bot, and never through the
 sandbox_runner local fallback. The tool is only offered when ALL of these hold:
 
     - a PandaStack key is set and the pandastack package is installed,
@@ -14,8 +14,8 @@ from __future__ import annotations
 import os
 
 from LilyAiCore.Exceptions.errors import ToolError
-from LilyAiGameSpace import vm_runner
-from LilyAiGameSpace.sandbox_runner import SandboxError
+from LilyAiTool.Sandbox import vm_runner
+from LilyAiTool.Sandbox.sandbox_runner import SandboxError
 from LilyAiTool.Models.tool_models import ToolSpec
 
 CATEGORY = "vm"

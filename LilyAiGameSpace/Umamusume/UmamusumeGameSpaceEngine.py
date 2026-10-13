@@ -36,7 +36,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
-DOCS_ROOT = Path(__file__).resolve().parent / "Umamusume"
+DOCS_ROOT = Path(__file__).resolve().parent
 
 MAX_FILE_BYTES = 2_000_000
 DEFAULT_READ_CHARS = 6000

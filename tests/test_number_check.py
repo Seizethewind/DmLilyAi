@@ -4,7 +4,7 @@ Run:  python -m pytest tests/test_number_check.py -v
 """
 import pytest
 
-number_check = pytest.importorskip("LilyAiGameSpace.number_check")
+number_check = pytest.importorskip("LilyAiCore.Helpers.number_check")
 
 EVIDENCE = ["Kitasan Black has a bonus of 30", "The card costs 1,200 points"]
 

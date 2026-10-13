@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = ROOT / "LilyAiGameSpace" / "sandbox_scripts"
+SCRIPTS = ROOT / "LilyAiTool" / "Sandbox" / "sandbox_scripts"
 
 
 def _load(name: str):
@@ -95,7 +95,7 @@ def test_the_old_ops_are_unchanged():
 # ---- through the runner (local fallback: no key here)
 def test_the_runner_falls_back_locally_for_parents(monkeypatch):
     pytest.importorskip("LilyAiCore.Logging.logger")
-    from LilyAiGameSpace import sandbox_runner as sr
+    from LilyAiTool.Sandbox import sandbox_runner as sr
 
     monkeypatch.setenv("PANDASTACK_API_KEY", "")
     monkeypatch.delenv("LILYAI_SANDBOX_LOCAL_FALLBACK", raising=False)

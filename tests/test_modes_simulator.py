@@ -154,7 +154,7 @@ class ModeRouterTests(AppCase):
 
     def _doc_snippet(self):
         """The passage the game docs inject for 'Special Week' (what Lily used to answer from on every turn)."""
-        from LilyAiGameSpace.UmamusumeGameSpaceEngine import get_engine
+        from LilyAiGameSpace.Umamusume.UmamusumeGameSpaceEngine import get_engine
         snippets = get_engine().context_for("Special Week")
         if not snippets:
             self.skipTest("game docs not indexed here")

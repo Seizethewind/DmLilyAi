@@ -21,8 +21,8 @@ import threading
 from typing import Any, Callable
 
 from LilyAiCore.Logging.logger import get_logger
-from LilyAiGameSpace import sandbox_runner as sr
-from LilyAiGameSpace.sandbox_runner import SandboxError
+from LilyAiTool.Sandbox import sandbox_runner as sr
+from LilyAiTool.Sandbox.sandbox_runner import SandboxError
 
 log = get_logger("gamespace.vm")
 
