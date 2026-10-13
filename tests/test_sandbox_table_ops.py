@@ -6,13 +6,13 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "LilyAiGameSpace" / "sandbox_scripts" / "docs_table_ops.py"
+SCRIPT = ROOT / "LilyAiTool" / "Sandbox" / "sandbox_scripts" / "docs_table_ops.py"
 
 spec = importlib.util.spec_from_file_location("docs_table_ops", SCRIPT)
 ops = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ops)
 
-CALC_SCRIPT = ROOT / "LilyAiGameSpace" / "sandbox_scripts" / "game_calcs.py"
+CALC_SCRIPT = ROOT / "LilyAiTool" / "Sandbox" / "sandbox_scripts" / "game_calcs.py"
 cspec = importlib.util.spec_from_file_location("game_calcs", CALC_SCRIPT)
 calcs = importlib.util.module_from_spec(cspec)
 cspec.loader.exec_module(calcs)
@@ -78,7 +78,7 @@ class _FakeSandbox:
 
 def test_runner_uses_sandbox_and_always_kills():
     pytest.importorskip("LilyAiCore.Logging.logger")
-    from LilyAiGameSpace import sandbox_runner as sr
+    from LilyAiTool.Sandbox import sandbox_runner as sr
 
     sr._cache.clear()
     out = sr.run_table_op(DOC, {"op": "top", "column": "Friendship", "n": 1},
@@ -96,7 +96,7 @@ class _RateLimited(Exception):
 
 def test_multiple_keys_rotate_and_skip_a_limited_key(monkeypatch):
     pytest.importorskip("LilyAiCore.Logging.logger")
-    from LilyAiGameSpace import sandbox_runner as sr
+    from LilyAiTool.Sandbox import sandbox_runner as sr
 
     monkeypatch.setenv("PANDASTACK_API_KEY", " k1, k2 ,k2,k3,k4,k5,k6,k7 ")
     assert sr.load_keys() == ["k1", "k2", "k3", "k4", "k5", "k6"]   # trimmed, de-duplicated, max 6
@@ -161,7 +161,7 @@ def test_unknown_things_are_refused_not_guessed():
 
 def test_run_calc_goes_through_the_sandbox_and_kills_it():
     pytest.importorskip("LilyAiCore.Logging.logger")
-    from LilyAiGameSpace import sandbox_runner as sr
+    from LilyAiTool.Sandbox import sandbox_runner as sr
 
     sr._cache.clear()
     before = _FakeSandbox.killed

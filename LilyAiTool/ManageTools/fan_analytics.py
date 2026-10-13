@@ -2,7 +2,7 @@
 
 The numbers per member come from member_gains() (LilyAiCore/ExternalServices/Umamoe/gains.py), the one implementation of
 the fan-gain maths. The comparison with the quota and the month projection run in a fixed script inside a PandaStack
-sandbox (LilyAiGameSpace/sandbox_scripts/manage_calcs.py), or locally if the sandbox is unavailable. The model only picks
+sandbox (LilyAiTool/Sandbox/sandbox_scripts/manage_calcs.py), or locally if the sandbox is unavailable. The model only picks
 an operation and its parameters, so it never does the arithmetic itself.
 
 Only trainer name, Trainer ID, club and fan numbers are sent. Never a Discord ID.
@@ -13,8 +13,8 @@ from typing import Any
 
 from LilyAiCore.Exceptions.errors import ToolError
 from LilyAiCore.ExternalServices.Umamoe.gains import member_gains
-from LilyAiGameSpace import manage_runner
-from LilyAiGameSpace.sandbox_runner import SandboxError
+from LilyAiTool.Sandbox import manage_runner
+from LilyAiTool.Sandbox.sandbox_runner import SandboxError
 from LilyAiTool.Models.tool_models import ToolContextData, ToolSpec
 
 CATEGORY = "umamoe"

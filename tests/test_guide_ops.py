@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = ROOT / "LilyAiGameSpace" / "sandbox_scripts"
+SCRIPTS = ROOT / "LilyAiTool" / "Sandbox" / "sandbox_scripts"
 
 
 def _load(name: str):
@@ -119,7 +119,8 @@ def test_unknown_op_is_an_error():
 @pytest.fixture()
 def gb(monkeypatch):
     pytest.importorskip("LilyAiCore.Logging.logger")
-    from LilyAiGameSpace import guide_builder, sandbox_runner
+    from LilyAiGameSpace import guide_builder
+    from LilyAiTool.Sandbox import sandbox_runner
 
     monkeypatch.setenv("PANDASTACK_API_KEY", "")
     monkeypatch.delenv("LILYAI_SANDBOX_LOCAL_FALLBACK", raising=False)

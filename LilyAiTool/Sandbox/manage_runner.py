@@ -18,7 +18,7 @@ from functools import lru_cache
 from typing import Any, Callable
 
 from LilyAiCore.Logging.logger import get_logger
-from LilyAiGameSpace.sandbox_runner import SCRIPT_DIR, SandboxError, _execute
+from LilyAiTool.Sandbox.sandbox_runner import SCRIPT_DIR, SandboxError, _execute
 
 log = get_logger("gamespace.manage")
 

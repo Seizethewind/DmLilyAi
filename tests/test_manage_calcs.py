@@ -16,7 +16,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-SCRIPT = ROOT / "LilyAiGameSpace" / "sandbox_scripts" / "manage_calcs.py"
+SCRIPT = ROOT / "LilyAiTool" / "Sandbox" / "sandbox_scripts" / "manage_calcs.py"
 _spec = importlib.util.spec_from_file_location("manage_calcs", SCRIPT)
 mc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(mc)
@@ -134,7 +134,7 @@ class _FakeSandbox:
 
 def _runner():
     try:
-        from LilyAiGameSpace import manage_runner, sandbox_runner
+        from LilyAiTool.Sandbox import manage_runner, sandbox_runner
     except ImportError as e:   # not importable in this environment (a missing optional dependency)
         raise unittest.SkipTest(f"runner not importable here: {e}")
     sandbox_runner._cache.clear()
@@ -202,7 +202,7 @@ class ToolTests(unittest.TestCase):
         from LilyAiTool.Models.tool_models import ToolContextData
 
         seen = {}
-        from LilyAiGameSpace import manage_runner
+        from LilyAiTool.Sandbox import manage_runner
         real = manage_runner.run_manage
 
         def spy(params, **kw):

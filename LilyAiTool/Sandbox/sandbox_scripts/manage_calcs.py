@@ -1,4 +1,4 @@
-"""Manage Mode fan analytics. Runs INSIDE a PandaStack sandbox (or locally, see LilyAiGameSpace/manage_runner.py).
+"""Manage Mode fan analytics. Runs INSIDE a PandaStack sandbox (or locally, see LilyAiTool/Sandbox/manage_runner.py).
 Standard library only.
 
 LilyAi uploads /workspace/params.json and runs this file. It prints one JSON object:

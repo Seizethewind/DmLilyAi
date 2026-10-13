@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = ROOT / "LilyAiGameSpace" / "sandbox_scripts"
+SCRIPTS = ROOT / "LilyAiTool" / "Sandbox" / "sandbox_scripts"
 
 
 def _load(name: str):
@@ -143,7 +143,7 @@ class _FakeSandbox:
 @pytest.fixture()
 def sr(monkeypatch):
     pytest.importorskip("LilyAiCore.Logging.logger")
-    from LilyAiGameSpace import sandbox_runner
+    from LilyAiTool.Sandbox import sandbox_runner
 
     monkeypatch.setenv("PANDASTACK_API_KEY", "")
     monkeypatch.delenv("LILYAI_SANDBOX_LOCAL_FALLBACK", raising=False)

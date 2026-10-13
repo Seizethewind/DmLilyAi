@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("affinity_calc", ROOT / "LilyAiGameSpace" / "sandbox_scripts" / "affinity_calc.py")
+spec = importlib.util.spec_from_file_location("affinity_calc", ROOT / "LilyAiTool" / "Sandbox" / "sandbox_scripts" / "affinity_calc.py")
 ac = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ac)
 
