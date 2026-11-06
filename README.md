@@ -1,6 +1,6 @@
 # LilyAi
 
-LilyAi is a modular AI agent platform built with Python and powered by Groq.
+LilyAi is a modular AI agent platform built with Python and powered by your self-hosted router (FreeLLMAPI or 9Router, OpenAI-compatible). Groq still works as a fallback when no router is set.
 
 The project is designed around independent intelligence domains that separate memory, context, knowledge retrieval, web retrieval, learning, and tool execution.
 
@@ -13,7 +13,7 @@ LilyAi primarily operates through Discord Direct Messages and includes a web adm
 ```bash
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env                                   # add GROQ_API_KEY, DISCORD_TOKEN, ADMIN_TOKEN
+cp .env.example .env                                   # add ROUTER_BASE_URL, ROUTER_API_KEY, DISCORD_TOKEN, ADMIN_TOKEN
 python -m LilyAiMain.main                              # bot + API + website on http://localhost:8000
 ```
 
@@ -96,7 +96,7 @@ which is a chat tester.
 | Layer | Choice |
 |-------|--------|
 | Language | Python |
-| AI Provider | Groq (free-tier models) |
+| AI Provider | Self-hosted router (`auto:fast` / `auto:smart`); Groq as fallback |
 | Platform | Discord |
 | Deployment | Docker, Render |
 
