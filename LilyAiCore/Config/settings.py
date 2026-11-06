@@ -54,6 +54,13 @@ class Settings:
     self_ping_enabled: bool
     self_ping_url: str
     self_ping_interval_s: float
+    # Self-hosted router (FreeLLMAPI / 9Router). When both are set it replaces Groq as the model provider.
+    router_base_url: str = ""
+    router_api_keys: tuple[str, ...] = ()
+
+    @property
+    def via_router(self) -> bool:
+        return bool(self.router_base_url and self.router_api_keys)
 
     @property
     def db_path(self) -> Path:
@@ -74,12 +81,18 @@ def load_settings() -> Settings:
     allowed = frozenset(int(x) for x in os.getenv("ALLOWED_USER_IDS", "").split(",") if x.strip().isdigit())
     scan_seconds_raw = os.getenv("MODEL_SCAN_INTERVAL_SECONDS", "").strip()
     umamoe_seconds_raw = os.getenv("UMAMOE_POLL_INTERVAL_SECONDS", "").strip()
+    router_base_url = os.getenv("ROUTER_BASE_URL", "").strip()
+    router_api_keys = tuple(k.strip() for k in os.getenv("ROUTER_API_KEY", "").split(",") if k.strip())
+    via_router = bool(router_base_url and router_api_keys)
     return Settings(
+        router_base_url=router_base_url,
+        router_api_keys=router_api_keys,
         discord_token=os.getenv("DISCORD_TOKEN", ""),
         groq_api_keys=tuple(k.strip() for k in os.getenv("GROQ_API_KEY", "").split(",") if k.strip()),
         groq_base_url=os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1"),
-        chat_model=os.getenv("LILYAI_CHAT_MODEL", "openai/gpt-oss-20b"),
-        reasoning_model=os.getenv("LILYAI_REASONING_MODEL", "openai/gpt-oss-120b"),
+        # Through the router the defaults are its selectors; the router picks the actual model.
+        chat_model=os.getenv("LILYAI_CHAT_MODEL", "auto:fast" if via_router else "openai/gpt-oss-20b"),
+        reasoning_model=os.getenv("LILYAI_REASONING_MODEL", "auto:smart" if via_router else "openai/gpt-oss-120b"),
         data_dir=data_dir,
         log_level=os.getenv("LOG_LEVEL", "INFO"),
         enable_discord=_bool("ENABLE_DISCORD", True),

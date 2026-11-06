@@ -15,6 +15,8 @@ log = get_logger("provider.groq")
 
 
 class GroqProvider(LLMProvider):
+    max_tokens_field = "max_completion_tokens"  # Groq's name for it; RouterProvider sends the plain OpenAI "max_tokens"
+
     def __init__(
         self,
         api_keys: list[str] | str,
@@ -64,7 +66,7 @@ class GroqProvider(LLMProvider):
     async def _call(self, model, messages, tools, temperature, max_tokens, json_mode) -> LLMResponse:
         body: dict[str, Any] = {"model": model, "messages": messages, "temperature": temperature}
         if max_tokens:
-            body["max_completion_tokens"] = max_tokens
+            body[self.max_tokens_field] = max_tokens
         if tools:
             body["tools"] = tools
             body["tool_choice"] = "auto"
