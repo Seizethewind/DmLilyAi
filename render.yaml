@@ -7,6 +7,13 @@ services:
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
     envVars:
+      # Model provider: the self-hosted router. Needs a public https URL (Render can't reach a LAN address). Include /v1.
+      # If LILYAI_CHAT_MODEL / LILYAI_REASONING_MODEL were set here for Groq, delete them so the router defaults apply.
+      - key: ROUTER_BASE_URL
+        sync: false
+      - key: ROUTER_API_KEY
+        sync: false
+      # Fallback only: used when both router values above are empty.
       - key: GROQ_API_KEY
         sync: false
       - key: DISCORD_TOKEN
