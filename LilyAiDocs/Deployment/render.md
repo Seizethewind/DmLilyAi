@@ -3,7 +3,7 @@
 One Render web service runs everything: the Discord bot, the API and the website. **The Render URL is the website.**
 
 1. Push the repo, then create a Blueprint from the root `render.yaml` (or a Docker web service using the root `Dockerfile`).
-2. Set `GROQ_API_KEY` and `DISCORD_TOKEN`. `ADMIN_TOKEN` is generated: copy it from the service's environment tab.
+2. Set `ROUTER_BASE_URL` (a public https address ending in `/v1`; Render cannot reach a LAN address), `ROUTER_API_KEY` and `DISCORD_TOKEN`. `GROQ_API_KEY` is only a fallback when the router is not set. Leave `LILYAI_CHAT_MODEL` and `LILYAI_REASONING_MODEL` unset so the router defaults (`auto:fast`, `auto:smart`) apply. `ADMIN_TOKEN` is generated: copy it from the service's environment tab.
 3. Open the Render URL, go to **Settings**, paste the admin token, then **Save and test**.
 
 **Updating the site:** edit files in `LilyAiFrontend/`, push to git, Render redeploys. There is no build step. The server tells browsers to revalidate on every load, so changes show up on the next refresh.

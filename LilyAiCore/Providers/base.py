@@ -21,6 +21,9 @@ class LLMResponse:
 
 
 class LLMProvider(ABC):
+    # False where probing the model list on a schedule makes no sense (offline, or a router that picks models itself).
+    scans_models: bool = True
+
     @abstractmethod
     async def chat(
         self,

@@ -422,17 +422,23 @@ def build_app(
     search_provider: SearchProvider | None = None,
     db: Database | TursoDatabase | None = None,
 ) -> App:
-    pool = ModelPool()
+    # Through the router there is no hand-picked Groq pool: the router chooses the model and does the failover.
+    pool = ModelPool(()) if provider is None and settings.via_router else ModelPool()
     db = db or _build_db(settings)
 
     if provider is None:
-        if settings.groq_api_keys:
+        if settings.via_router:
+            from LilyAiCore.Providers.Router.client import RouterProvider
+
+            provider = RouterProvider(list(settings.router_api_keys), settings.router_base_url, settings.chat_model, pool)
+            log.info("Router provider ready at %s with %d API key(s)", settings.router_base_url, len(settings.router_api_keys))
+        elif settings.groq_api_keys:
             from LilyAiCore.Providers.Groq.client import GroqProvider
 
             provider = GroqProvider(list(settings.groq_api_keys), settings.groq_base_url, settings.chat_model, pool)
             log.info("Groq provider ready with %d API key(s)", len(settings.groq_api_keys))
         else:
-            log.warning("GROQ_API_KEY not set: running with the offline provider")
+            log.warning("ROUTER_BASE_URL/ROUTER_API_KEY and GROQ_API_KEY not set: running with the offline provider")
             provider = OfflineProvider()
 
     if search_provider is None:
@@ -507,7 +513,7 @@ def build_app(
     if not settings.webhook_url:
         log.info("WEBHOOK_URL not set: ops alerts (task crashes, job failures) are logged only")
     scheduler = Scheduler(settings.webhook_url)
-    if settings.model_scan_enabled and not isinstance(provider, OfflineProvider):
+    if settings.model_scan_enabled and provider.scans_models:
         if settings.model_scan_interval_s is not None:
             # Explicit seconds override (e.g. MODEL_SCAN_INTERVAL_SECONDS=600). 60s floor guards
             # against a mistyped tiny value hammering the Groq API.
